@@ -1,0 +1,2578 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="Bible Champions: a team Bible trivia game. Spin the eight-slot wheel, answer from the Scriptures and collect all seven champions.">
+<meta name="theme-color" content="#1b1047">
+<meta property="og:title" content="Bible Champions">
+<meta property="og:description" content="Explore the Bible. Collect the Champions. Win the Crown!">
+<meta property="og:type" content="website">
+<meta property="og:image" content="social-card.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="favicon.png" type="image/png">
+<style>
+  :root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+  body{margin:0}
+  img{max-width:100%}
+  [hidden]{display:none!important}
+</style>
+<title>Bible Champions</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Outfit:wght@400;500;600;700;800;900&display=swap">
+<style>
+/* Layout concept: a lit sanctuary of deep indigo. The eight-slot wheel holds the centre and
+   the teams ring it — left and right, then below, then the four corners. Every character is a
+   gold-ringed medallion: one image serves the wheel, the team slots and the unlock sheet. */
+:root{
+  --bg-1:#1b1047; --bg-2:#0c0722; --bg-3:#3a1b8f;
+  --panel:rgba(255,255,255,.085); --panel-2:rgba(255,255,255,.14); --panel-3:rgba(0,0,0,.26);
+  --line:rgba(255,255,255,.17); --line-2:rgba(255,255,255,.32);
+  --ink:#ffffff; --ink-2:#ddd5f5; --ink-3:#a79ad2;
+  --gold:#ffc83d; --gold-2:#f0a500; --gold-ink:#3d2600; --ivory:#fff5df;
+  --good:#19c97d; --good-ink:#02331c; --bad:#ff624f; --bad-ink:#3d0a04;
+  /* Electric purple and royal blue from the brief, lifted just enough to stay legible as text
+     on the dark background — they are used for names as well as for wheel slots. */
+  --c-prophecy:#8b45f0; --c-history:#ff9f1c; --c-geography:#08c9cf; --c-art:#ff4eb8;
+  --c-sports:#ff624f; --c-economics:#19c97d; --c-riddles:#3b82f6; --c-crown:#ffc83d;
+  --r-s:12px; --r-m:18px; --r-l:26px; --r-xl:34px;
+  --sh:0 10px 30px rgba(6,2,24,.5);
+  --sh-lg:0 22px 60px rgba(6,2,24,.65);
+  --f-display:"Baloo 2","Trebuchet MS",system-ui,sans-serif;
+  --f-body:"Outfit","Segoe UI",system-ui,sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{min-height:100%}
+body{
+  margin:0;min-height:100%;font-family:var(--f-body);color:var(--ink);font-size:16px;line-height:1.45;
+  background:
+    radial-gradient(980px 660px at 50% -12%, var(--bg-3) 0%, transparent 62%),
+    radial-gradient(720px 520px at 8% 102%, #0a6f9e 0%, transparent 58%),
+    radial-gradient(680px 500px at 95% 88%, #8d2fb8 0%, transparent 58%),
+    radial-gradient(520px 380px at 76% 8%, #c97a12 0%, transparent 62%),
+    linear-gradient(180deg, var(--bg-1), var(--bg-2));
+  background-attachment:fixed;-webkit-font-smoothing:antialiased;
+}
+#stars{position:fixed;inset:0;pointer-events:none;z-index:0}
+.app{position:relative;z-index:1;min-height:100%;display:flex;flex-direction:column}
+.wrap{width:100%;max-width:1360px;margin:0 auto;
+  padding-left:max(16px,env(safe-area-inset-left,0px));
+  padding-right:max(16px,env(safe-area-inset-right,0px));}
+h1,h2,h3,h4{margin:0;font-family:var(--f-display);font-weight:700;text-wrap:balance;letter-spacing:.2px}
+p{margin:0}
+button{font-family:inherit}
+.tnum{font-variant-numeric:tabular-nums}
+.muted{color:var(--ink-2)}
+.spacer{flex:1 1 auto;min-width:0}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.row.between{justify-content:space-between}
+.eyebrow{font-family:var(--f-body);font-size:11.5px;font-weight:800;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--ink-3)}
+
+/* ---------- buttons ---------- */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;cursor:pointer;
+  font-family:var(--f-display);font-size:16px;font-weight:700;letter-spacing:.3px;
+  color:var(--gold-ink);background:linear-gradient(180deg,var(--gold),var(--gold-2));
+  border:0;border-radius:999px;padding:14px 26px;box-shadow:0 6px 0 #b67700,var(--sh);
+  transition:transform .1s ease,box-shadow .1s ease,filter .15s ease}
+.btn:hover{filter:brightness(1.06)}
+.btn:active{transform:translateY(4px);box-shadow:0 2px 0 #b67700,var(--sh)}
+.btn:focus-visible{outline:3px solid #fff;outline-offset:3px}
+.btn[disabled]{opacity:.45;cursor:not-allowed;transform:none}
+.btn.lg{font-size:19px;padding:17px 36px}
+.btn.sm{font-size:14px;padding:9px 16px;box-shadow:0 4px 0 #b67700}
+.btn.sm:active{box-shadow:0 1px 0 #b67700}
+.btn.block{width:100%}
+.btn.ghost{color:#fff;background:var(--panel-2);box-shadow:0 4px 0 rgba(0,0,0,.3),var(--sh)}
+.btn.ghost:active{box-shadow:0 1px 0 rgba(0,0,0,.3)}
+.btn.ghost:hover{background:rgba(255,255,255,.22)}
+.btn.danger{color:#fff;background:linear-gradient(180deg,#ff6f5d,#e0392a);box-shadow:0 4px 0 #9c1f14,var(--sh)}
+.icon-btn{display:inline-flex;align-items:center;justify-content:center;width:42px;height:42px;
+  border-radius:50%;border:1px solid var(--line);background:var(--panel);color:#fff;font-size:17px;
+  cursor:pointer;transition:background .15s,transform .12s}
+.icon-btn:hover{background:var(--panel-2)}
+.icon-btn:active{transform:scale(.93)}
+.icon-btn:focus-visible{outline:3px solid #fff;outline-offset:2px}
+.icon-btn.on{background:var(--gold);color:var(--gold-ink);border-color:transparent}
+
+/* ---------- surfaces ---------- */
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r-l);
+  box-shadow:var(--sh);padding:22px;backdrop-filter:blur(6px)}
+.card.flat{background:var(--panel-3);box-shadow:none}
+.card.tight{padding:15px;border-radius:var(--r-m)}
+.chip{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:6px 13px;
+  font-size:13.5px;font-weight:800;background:var(--panel-2);border:1px solid var(--line)}
+.chip.gold{background:var(--gold);color:var(--gold-ink);border-color:transparent}
+.tag{display:inline-flex;align-items:center;font-size:11px;font-weight:800;letter-spacing:.07em;
+  text-transform:uppercase;padding:4px 9px;border-radius:7px;background:var(--panel-2);
+  border:1px solid var(--line);color:var(--ink-2)}
+.tag.cat{background:var(--cc);color:#120726;border-color:transparent}
+.tag.ref{background:rgba(255,200,61,.17);border-color:var(--gold);color:var(--gold);
+  text-transform:none;letter-spacing:.02em;font-size:11.5px}
+.tag.warn{background:rgba(255,98,79,.2);border-color:var(--bad);color:#ffb3a8;text-transform:none}
+
+/* ---------- top bar ---------- */
+.topbar{display:flex;align-items:center;gap:10px;padding-block:16px;flex-wrap:wrap}
+.brand{font-family:var(--f-display);font-size:19px;font-weight:800;letter-spacing:.4px}
+.brand span{color:var(--gold)}
+
+/* ---------- character medallions ---------- */
+/* The art is a portrait crop on its own painted backdrop, so every tile is a circular
+   medallion with a gold ring: the crop reads as deliberate framing rather than a bad cutout. */
+.ctile{position:relative;display:block;aspect-ratio:1/1;min-width:0;border-radius:50%;overflow:hidden;
+  background:#1a0f3d;box-shadow:0 0 0 3px rgba(255,255,255,.85),0 6px 16px rgba(0,0,0,.5)}
+.ctile img{width:100%;height:100%;object-fit:cover;object-position:50% 2%;display:block}
+.ctile.on{box-shadow:0 0 0 3px var(--cc),0 0 20px color-mix(in srgb,var(--cc) 55%,transparent),0 6px 16px rgba(0,0,0,.5)}
+.ctile.dim img{filter:grayscale(1) brightness(.42)}
+.ctile.dim{box-shadow:0 0 0 2px rgba(255,255,255,.2)}
+.ctile.tall{border-radius:var(--r-l);aspect-ratio:253/455}
+.ctile.tall img{object-position:50% 50%}
+
+/* ---------- home ---------- */
+.home{display:flex;flex-direction:column;align-items:center;gap:24px;padding-block:6px 52px;text-align:center}
+.logo{font-family:var(--f-display);font-weight:800;line-height:1;letter-spacing:.5px}
+.logo .l1{display:block;font-size:clamp(32px,7vw,74px);color:#fff;
+  text-shadow:0 4px 0 #3a1b8f,0 10px 26px rgba(0,0,0,.55)}
+.logo .l2{display:block;font-size:clamp(32px,7vw,74px);
+  background:linear-gradient(180deg,#ffe9a3,var(--gold) 55%,#e08900);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  filter:drop-shadow(0 4px 0 #8a5a00) drop-shadow(0 12px 24px rgba(255,180,40,.35))}
+.tagline{font-size:clamp(15px,1.9vw,20px);font-weight:700;color:var(--ivory)}
+.crown-hero{width:min(42vw,180px);animation:bob 4s ease-in-out infinite;
+  box-shadow:0 0 0 4px var(--gold),0 0 44px rgba(255,200,61,.55),0 10px 30px rgba(0,0,0,.5)}
+.cast{display:grid;grid-template-columns:repeat(7,1fr);gap:clamp(5px,1.1vw,14px);width:100%;max-width:1040px}
+@media (max-width:760px){.cast{grid-template-columns:repeat(4,1fr)}}
+.cast figure{margin:0;display:flex;flex-direction:column;gap:6px;align-items:center}
+.cast .ctile{width:100%;animation:bob 4.5s ease-in-out infinite}
+.cast figure:nth-child(2) .ctile{animation-delay:.25s}
+.cast figure:nth-child(3) .ctile{animation-delay:.5s}
+.cast figure:nth-child(4) .ctile{animation-delay:.75s}
+.cast figure:nth-child(5) .ctile{animation-delay:1s}
+.cast figure:nth-child(6) .ctile{animation-delay:1.25s}
+.cast figure:nth-child(7) .ctile{animation-delay:1.5s}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
+.cast figcaption{font-family:var(--f-display);font-size:clamp(11px,1.3vw,15px);font-weight:700;color:var(--cc)}
+.cast figcaption small{display:block;font-family:var(--f-body);font-size:9.5px;font-weight:800;
+  letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3);margin-top:1px}
+.home-actions{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
+.home-note{color:var(--ink-2);max-width:58ch;font-size:15px;font-weight:500}
+
+/* ---------- forms ---------- */
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:20px}
+.field{display:flex;flex-direction:column;gap:8px;min-width:0}
+.label{font-size:11.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+.hint{font-size:13px;color:var(--ink-3);font-weight:600}
+.seg{display:flex;flex-wrap:wrap;gap:7px}
+.seg button{font-family:var(--f-body);font-size:14px;font-weight:800;color:var(--ink-2);cursor:pointer;
+  background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:9px 16px;transition:all .14s}
+.seg button:hover{background:var(--panel-2);color:#fff}
+.seg button[aria-pressed="true"]{background:var(--gold);color:var(--gold-ink);border-color:transparent}
+.seg button:focus-visible{outline:3px solid #fff;outline-offset:2px}
+input[type=text],textarea,select{font-family:var(--f-body);font-size:15px;font-weight:600;color:#fff;
+  background:var(--panel-3);border:1px solid var(--line);border-radius:12px;padding:11px 14px;width:100%}
+textarea{font-family:ui-monospace,Consolas,monospace;font-size:12.5px;font-weight:400;min-height:190px;resize:vertical}
+input:focus,textarea:focus,select:focus{outline:3px solid var(--gold);outline-offset:1px;border-color:transparent}
+select option{background:#1b1047;color:#fff}
+.swatches{display:flex;gap:7px;flex-wrap:wrap}
+.swatch{width:28px;height:28px;border-radius:50%;border:2px solid transparent;cursor:pointer;padding:0;transition:transform .12s}
+.swatch[aria-pressed="true"]{border-color:#fff;transform:scale(1.15)}
+.team-row{display:flex;gap:16px;align-items:flex-end;flex-wrap:wrap;padding:15px;border-radius:var(--r-m);
+  background:var(--panel-3);border:1px solid var(--line);border-left:4px solid var(--tc)}
+.team-row .field{flex:1 1 190px}
+
+/* ---------- the arena ---------- */
+.arena{display:grid;gap:clamp(10px,1.6vw,20px);align-items:center;justify-items:center;
+  grid-template-columns:minmax(0,215px) minmax(0,1fr) minmax(0,215px);
+  grid-template-rows:auto auto auto;padding-bottom:30px}
+.arena .center{grid-column:2;grid-row:2;width:100%;display:flex;flex-direction:column;
+  align-items:center;gap:16px;min-width:0}
+@media (max-width:960px){
+  .arena{grid-template-columns:1fr 1fr;grid-template-rows:auto auto}
+  .arena .center{grid-column:1/-1;grid-row:1}
+  .arena .seat{grid-column:auto!important;grid-row:auto!important;width:100%}
+}
+.seat{width:100%;max-width:250px;justify-self:center}
+
+/* wheel */
+.wheel-stage{position:relative;width:min(100%,470px);aspect-ratio:1/1;display:grid;place-items:center;margin-inline:auto}
+.wheel-rotor{width:100%;height:100%;transform:rotate(0deg)}
+.wheel-rotor.spin{transition:transform 5.2s cubic-bezier(.13,.78,.1,1)}
+.wheel-glow{position:absolute;inset:-9%;border-radius:50%;pointer-events:none;
+  background:radial-gradient(circle,rgba(255,200,61,.26),transparent 62%);filter:blur(16px)}
+.pointer{position:absolute;top:-2px;left:50%;transform:translateX(-50%);z-index:3;width:0;height:0;
+  border-left:17px solid transparent;border-right:17px solid transparent;border-top:30px solid #fff;
+  filter:drop-shadow(0 3px 5px rgba(0,0,0,.55))}
+.pointer.hit{animation:tick .45s cubic-bezier(.3,1.6,.4,1)}
+@keyframes tick{0%{transform:translateX(-50%) rotate(0)}35%{transform:translateX(-50%) rotate(-16deg)}100%{transform:translateX(-50%) rotate(0)}}
+.spin-hub{position:absolute;width:25%;aspect-ratio:1;border-radius:50%;z-index:2;cursor:pointer;
+  border:5px solid #fff;background:linear-gradient(180deg,var(--gold),var(--gold-2));color:var(--gold-ink);
+  font-family:var(--f-display);font-size:clamp(13px,2.1vw,21px);font-weight:800;letter-spacing:.5px;
+  box-shadow:0 8px 24px rgba(0,0,0,.5);transition:transform .12s}
+.spin-hub:not([disabled]){animation:breathe 2.6s ease-in-out infinite}
+@keyframes breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+.spin-hub:active:not([disabled]){transform:scale(.94)}
+.spin-hub[disabled]{opacity:.55;cursor:default;animation:none}
+.spin-hub:focus-visible{outline:3px solid #fff;outline-offset:4px}
+.cat-reveal{display:flex;align-items:center;gap:14px;animation:popin .45s cubic-bezier(.2,1.5,.4,1) both}
+.cat-reveal .ctile{width:96px;flex:0 0 auto}
+.cat-reveal .nm{font-family:var(--f-display);font-size:clamp(20px,3vw,30px);font-weight:700;color:var(--cc)}
+.cat-reveal .nm small{display:block;font-family:var(--f-body);font-size:12px;font-weight:800;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+@keyframes popin{from{opacity:0;transform:scale(.7)}to{opacity:1;transform:none}}
+
+/* turn bar */
+.turn-bar{width:100%;display:flex;align-items:center;gap:13px;flex-wrap:wrap;border-radius:999px;
+  padding:11px 20px;background:linear-gradient(90deg,var(--tc),rgba(255,255,255,.08));
+  border:1px solid var(--line);box-shadow:var(--sh)}
+.turn-bar .who{font-family:var(--f-display);font-size:clamp(16px,2.1vw,22px);font-weight:700}
+
+/* team seat card */
+.team-card{width:100%;background:var(--panel);border:1px solid var(--line);border-top:4px solid var(--tc);
+  border-radius:var(--r-m);padding:12px;box-shadow:var(--sh);transition:transform .2s,box-shadow .2s}
+.team-card.active{transform:translateY(-3px) scale(1.03);box-shadow:0 0 0 2px var(--gold),var(--sh-lg)}
+.team-card .thead{display:flex;align-items:baseline;gap:8px;margin-bottom:9px}
+.team-card .tname{font-family:var(--f-display);font-size:15px;font-weight:700;overflow:hidden;
+  text-overflow:ellipsis;white-space:nowrap;min-width:0;flex:1}
+.team-card .score{font-family:var(--f-display);font-size:19px;font-weight:800;color:var(--gold)}
+.slots{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.slots .ctile{box-shadow:0 0 0 2px rgba(255,255,255,.5)}
+.slots .ctile.on{box-shadow:0 0 0 2px var(--cc),0 0 12px color-mix(in srgb,var(--cc) 60%,transparent)}
+.meter{display:flex;align-items:center;gap:7px;margin-top:9px;font-size:11.5px;font-weight:800;color:var(--ink-3)}
+.ll-mini{display:flex;gap:4px}
+.ll-mini span{display:inline-grid;place-items:center;width:21px;height:21px;border-radius:7px;
+  background:rgba(255,255,255,.14);color:var(--ink-2)}
+.ll-mini span.spent{opacity:.25}
+.prog{display:flex;gap:3px}
+.pip{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.22)}
+.pip.on{background:var(--gold)}
+
+/* question */
+.qcard{width:100%;max-width:900px;display:flex;flex-direction:column;gap:15px;
+  background:var(--panel);border:1px solid var(--line);border-radius:var(--r-xl);
+  box-shadow:var(--sh-lg);padding:clamp(16px,2.6vw,26px);backdrop-filter:blur(8px)}
+.qcard.crown{border-color:var(--gold);box-shadow:0 0 0 2px rgba(255,200,61,.5),var(--sh-lg)}
+.qhead{display:flex;align-items:center;gap:11px;flex-wrap:wrap}
+.qhead .ctile{width:54px;flex:0 0 auto}
+.qhead .cat{font-family:var(--f-display);font-size:17px;font-weight:700;color:var(--cc)}
+.timer-track{width:100%;height:10px;border-radius:999px;background:rgba(0,0,0,.33);overflow:hidden}
+.timer-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--good),var(--gold));transition:width .25s linear}
+.timer-fill.warn{background:linear-gradient(90deg,var(--gold),var(--bad));animation:flash .7s infinite}
+@keyframes flash{50%{opacity:.55}}
+.qtext{font-family:var(--f-display);font-size:clamp(19px,2.6vw,31px);font-weight:700;line-height:1.25}
+.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:11px}
+.opt{display:flex;align-items:center;gap:13px;text-align:left;cursor:pointer;width:100%;
+  font-family:var(--f-body);font-size:clamp(15px,1.6vw,17.5px);font-weight:700;color:#fff;
+  background:var(--panel-2);border:1px solid var(--line);border-radius:var(--r-m);padding:14px 16px;
+  transition:transform .1s,background .14s,border-color .14s}
+.opt:hover:not([disabled]){background:rgba(255,255,255,.24);transform:translateY(-2px)}
+.opt:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.opt .key{flex:0 0 auto;width:32px;height:32px;border-radius:50%;display:grid;place-items:center;
+  font-family:var(--f-display);font-size:15px;font-weight:700;background:rgba(0,0,0,.32)}
+.opt.correct{background:var(--good);color:var(--good-ink);border-color:transparent;animation:popin .35s}
+.opt.correct .key{background:rgba(0,0,0,.2)}
+.opt.wrong{background:var(--bad);color:var(--bad-ink);border-color:transparent;animation:shake .4s}
+.opt.wrong .key{background:rgba(0,0,0,.2)}
+.opt.dim{opacity:.4}
+.opt[disabled]{cursor:default}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-7px)}75%{transform:translateX(6px)}}
+.verdict{display:flex;align-items:center;gap:11px;border-radius:var(--r-m);padding:13px 17px;font-weight:900;
+  animation:popin .3s both;flex-wrap:wrap}
+.verdict.ok{background:rgba(25,201,125,.18);border:1px solid var(--good);color:var(--good)}
+.verdict.no{background:rgba(255,98,79,.18);border:1px solid var(--bad);color:var(--bad)}
+.verdict .big{font-family:var(--f-display);font-size:clamp(17px,2vw,23px);font-weight:700}
+.explain{background:var(--panel-3);border:1px solid var(--line);border-radius:var(--r-m);
+  padding:14px 16px;font-size:15px;line-height:1.5;color:var(--ink-2);font-weight:500}
+.explain b{color:#fff}
+.explain .scripture{display:inline-flex;margin-bottom:7px}
+
+/* lifelines */
+.lifelines{display:flex;gap:10px;flex-wrap:wrap;align-items:center;padding-top:2px}
+.lifelines .hint{flex:1 1 100%;margin-top:-4px}
+.ll{display:inline-flex;align-items:center;gap:9px;cursor:pointer;font-family:var(--f-body);
+  font-size:14px;font-weight:800;color:#fff;background:var(--panel-2);border:1px solid var(--line);
+  border-radius:999px;padding:9px 16px;transition:transform .12s,background .14s,color .14s}
+.ll:hover:not([disabled]){background:var(--gold);color:var(--gold-ink);border-color:transparent;transform:translateY(-2px)}
+.ll:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.ll[disabled]{opacity:.3;cursor:not-allowed}
+.ll[disabled] .nm{text-decoration:line-through}
+.ll .secs{font-variant-numeric:tabular-nums;opacity:.75}
+.consult-num{font-family:var(--f-display);font-size:clamp(56px,15vw,120px);font-weight:800;line-height:1;
+  color:var(--gold);font-variant-numeric:tabular-nums}
+.consult-ring{width:100%;height:10px;border-radius:999px;background:rgba(0,0,0,.32);overflow:hidden}
+.consult-ring i{display:block;height:100%;background:var(--gold);transition:width .25s linear}
+
+/* crown */
+.crown-pick{display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:12px;width:100%;max-width:820px}
+.pick-btn{display:flex;flex-direction:column;gap:6px;align-items:center;cursor:pointer;padding:12px;
+  background:var(--panel);border:1px solid var(--line);border-radius:var(--r-l);transition:all .15s}
+.pick-btn:hover:not([disabled]){border-color:var(--cc);transform:translateY(-4px);box-shadow:var(--sh-lg)}
+.pick-btn:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.pick-btn[disabled]{opacity:.32;cursor:not-allowed}
+.pick-btn .ctile{width:100%}
+.pick-btn .nm{font-family:var(--f-display);font-size:14.5px;font-weight:700;color:var(--cc)}
+.pick-btn .got{font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+.crown-title{font-family:var(--f-display);font-weight:800;font-size:clamp(24px,4.6vw,50px);letter-spacing:1px;
+  background:linear-gradient(180deg,#fff6d6,var(--gold) 60%,#e08900);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  filter:drop-shadow(0 3px 0 #8a5a00) drop-shadow(0 0 26px rgba(255,200,61,.6))}
+.goldflash{position:fixed;inset:0;z-index:38;pointer-events:none;
+  background:radial-gradient(circle at 50% 45%,rgba(255,220,120,.95),rgba(255,180,40,.5) 35%,transparent 70%);
+  animation:goldflash 1.1s ease-out both}
+@keyframes goldflash{0%{opacity:0}18%{opacity:1}100%{opacity:0}}
+
+/* overlays */
+.overlay{position:fixed;inset:0;z-index:40;display:grid;place-items:center;background:rgba(9,3,26,.82);
+  backdrop-filter:blur(7px);padding:max(18px,env(safe-area-inset-left,0px));animation:fade .22s both}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+.sheet{position:relative;background:linear-gradient(180deg,rgba(255,255,255,.15),rgba(255,255,255,.07));
+  border:1px solid var(--line);border-radius:var(--r-xl);box-shadow:var(--sh-lg);
+  padding:clamp(20px,4vw,34px);max-width:480px;width:100%;display:flex;flex-direction:column;
+  align-items:center;gap:14px;text-align:center;animation:sheetIn .45s cubic-bezier(.2,1.1,.3,1) both}
+.sheet.wide{max-width:860px}
+@keyframes sheetIn{from{opacity:0;transform:translateY(20px) scale(.95)}to{opacity:1;transform:none}}
+.sheet .hero{width:min(54vw,220px);animation:heroIn .65s cubic-bezier(.2,1.4,.35,1) both}
+@keyframes heroIn{from{opacity:0;transform:scale(.4) rotate(-12deg)}to{opacity:1;transform:none}}
+.sparks{position:absolute;inset:0;pointer-events:none;overflow:hidden;border-radius:var(--r-xl)}
+.sparks i{position:absolute;left:50%;top:46%;width:9px;height:9px;border-radius:50%;background:var(--gold);
+  box-shadow:0 0 12px var(--gold);animation:spark 1.4s ease-out forwards}
+@keyframes spark{from{transform:translate(0,0) scale(1);opacity:1}
+  to{transform:translate(var(--dx),var(--dy)) scale(.2);opacity:0}}
+.rays{position:absolute;width:min(92vw,700px);aspect-ratio:1;border-radius:50%;pointer-events:none;
+  background:conic-gradient(from 0deg,rgba(255,200,61,.34) 0 7deg,transparent 7deg 22deg);
+  animation:spin360 11s linear infinite;
+  mask-image:radial-gradient(circle,#000 16%,transparent 66%);
+  -webkit-mask-image:radial-gradient(circle,#000 16%,transparent 66%)}
+@keyframes spin360{to{transform:rotate(360deg)}}
+
+/* victory */
+.victory{display:flex;flex-direction:column;align-items:center;gap:20px;text-align:center;padding-block:28px 52px}
+.winner-name{font-family:var(--f-display);font-size:clamp(30px,6vw,60px);font-weight:800;color:var(--gold);
+  text-shadow:0 5px 0 #8a5a00,0 14px 30px rgba(0,0,0,.5)}
+.winner-cast{display:grid;grid-template-columns:repeat(7,1fr);gap:clamp(5px,1.4vw,14px);width:100%;max-width:760px}
+.winner-cast .ctile{animation:bob 4s ease-in-out infinite}
+.results{width:100%;max-width:820px;overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:520px}
+th,td{padding:11px 13px;text-align:left;border-bottom:1px solid var(--line);font-size:14.5px;font-weight:700}
+th{font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+tbody tr:last-child td{border-bottom:0}
+td.num{text-align:right;font-variant-numeric:tabular-nums;font-weight:900}
+#confetti{position:fixed;inset:0;z-index:50;pointer-events:none}
+
+/* drawer */
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(440px,100%);z-index:45;overflow-y:auto;
+  background:linear-gradient(180deg,#331880,#160a35);border-left:1px solid var(--line);
+  box-shadow:-20px 0 60px rgba(0,0,0,.6);animation:slide .25s ease both;
+  padding:18px max(18px,env(safe-area-inset-right,0px)) 44px 18px}
+@keyframes slide{from{transform:translateX(100%)}to{transform:none}}
+.drawer h3{font-family:var(--f-body);font-size:11.5px;font-weight:800;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink-3);margin:24px 0 11px}
+.drawer h3:first-of-type{margin-top:12px}
+.log-item{font-size:13px;padding:9px 11px;border-radius:10px;background:var(--panel-3);
+  margin-bottom:6px;border-left:3px solid var(--lc);font-weight:600}
+.confirm{background:rgba(255,98,79,.14);border:1px solid var(--bad);border-radius:var(--r-m);
+  padding:12px 14px;margin-bottom:10px;font-size:13.5px;font-weight:700}
+
+/* steps + bank */
+.steps{display:grid;gap:17px}
+.step{display:flex;gap:14px;align-items:flex-start}
+.step .n{flex:0 0 auto;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;
+  font-family:var(--f-display);font-size:16px;font-weight:700;background:var(--gold);color:var(--gold-ink)}
+.step h4{font-size:16px;margin:3px 0 2px}
+.step p{color:var(--ink-2);font-size:14.5px;font-weight:500}
+.bank-list{display:flex;flex-direction:column;gap:9px;margin-top:14px}
+.qrow{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--cc);
+  border-radius:var(--r-m);padding:14px}
+.qrow .meta{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:8px}
+.qrow .qq{font-weight:800;font-size:15.5px;line-height:1.35}
+.qrow .ans{margin-top:7px;font-size:14px;font-weight:800;color:var(--good)}
+.qrow .exp{margin-top:4px;font-size:13.5px;color:var(--ink-2);font-weight:500}
+.toolbar{display:flex;gap:11px;flex-wrap:wrap;align-items:flex-end}
+.toolbar .field{flex:1 1 150px}
+.empty{text-align:center;padding:46px 16px;color:var(--ink-3);font-weight:800}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:60;background:var(--gold);
+  color:var(--gold-ink);font-weight:900;font-size:14px;padding:12px 22px;border-radius:999px;
+  box-shadow:var(--sh-lg);animation:popin .25s both;max-width:min(92vw,520px);text-align:center}
+.kbd{display:inline-block;font-family:ui-monospace,monospace;font-size:12px;background:var(--panel-3);
+  border:1px solid var(--line);border-radius:6px;padding:2px 7px}
+
+/* projectors and TV: keep the text readable from the back of the room */
+@media (min-width:1500px){
+  body{font-size:17px}
+  .qtext{font-size:clamp(24px,2.2vw,36px)}
+  .opt{font-size:19px;padding:16px 18px}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+  .wheel-rotor.spin{transition:transform .4s ease-out}
+}
+html.calm *{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+html.calm .wheel-rotor.spin{transition:transform 1.2s ease-out}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<canvas id="confetti" hidden></canvas>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/htm/3.1.1/htm.js"></script>
+<script>
+(function(){
+"use strict";
+var React=window.React, ReactDOM=window.ReactDOM;
+var html=window.htm.bind(React.createElement);
+var useState=React.useState, useEffect=React.useEffect, useRef=React.useRef, useMemo=React.useMemo;
+
+/* ============================ the cast ============================ */
+/* Seven collectable champions, one per subject, plus Crown — the wildcard that never gives a
+   character away: it only lets a team choose which question it wants to be asked. */
+var CATS=[
+  {id:"prophecy",  short:"Ezra",
+   name:{en:"Ezra, the Vision Keeper",    es:"Ezra, el Guardián de las Visiones"},
+   subject:{en:"Bible Prophecies",        es:"Profecías Bíblicas"},  img:"art/prophecy.webp"},
+  {id:"history",   short:"Caleb",
+   name:{en:"Caleb, the Time Guardian",   es:"Caleb, el Guardián del Tiempo"},
+   subject:{en:"Bible History",           es:"Historia Bíblica"},    img:"art/history.webp"},
+  {id:"geography", short:"Jordan",
+   name:{en:"Jordan, the Explorer",       es:"Jordan, el Explorador"},
+   subject:{en:"Geography",               es:"Geografía"},           img:"art/geography.webp"},
+  {id:"art",       short:"Miriam",
+   name:{en:"Miriam, the Melody Maker",   es:"Miriam, la Creadora de Melodías"},
+   subject:{en:"Art",                     es:"Arte"},                img:"art/art.webp"},
+  {id:"sports",    short:"Asher",
+   name:{en:"Asher, the Champion",        es:"Asher, el Campeón"},
+   subject:{en:"Sports",                  es:"Deportes"},            img:"art/sports.webp"},
+  {id:"economics", short:"Levi",
+   name:{en:"Levi, the Merchant",         es:"Levi, el Mercader"},
+   subject:{en:"Economics",               es:"Economía"},            img:"art/economics.webp"},
+  {id:"riddles",   short:"Eli",
+   name:{en:"Eli, the Wise One",          es:"Eli, el Sabio"},
+   subject:{en:"Riddles",                 es:"Acertijos"},           img:"art/riddles.webp"}
+];
+var CROWN={id:"crown", short:"Crown",
+  name:{en:"Crown, the Golden Wildcard", es:"Crown, el Comodín Dorado"},
+  subject:{en:"Crown", es:"Corona"}, img:"art/crown.webp"};
+/* eight wheel slots: the seven subjects and the crown */
+var WHEEL=CATS.concat([CROWN]);
+var CAT_BY_ID={}; CATS.forEach(function(c){CAT_BY_ID[c.id]=c;}); CAT_BY_ID.crown=CROWN;
+
+var LANGS=[{id:"es",name:"Español"},{id:"en",name:"English"}];
+var DIFFS=["easy","medium","hard"];
+var POINTS={easy:100,medium:200,hard:300};
+var UNLOCK_BONUS=150;   /* winning a champion */
+var CROWN_BONUS=200;    /* answering a crown challenge correctly */
+var TEAM_COLORS=["#7428e8","#08c9cf","#ff624f","#19c97d","#ff4eb8","#2563eb","#ff9f1c","#b14ad8"];
+/* Lifelines: one use of each per team for the whole match. */
+var LIFELINES=[
+  {id:"scroll", secs:30, mode:"extend"},
+  {id:"ask",    secs:15, mode:"consult"}
+];
+
+/* ============================ strings ============================ */
+/* Every player-facing string lives here in both languages. `T` is rebuilt whenever the
+   language changes, so components keep reading plain `T.key`. */
+var STR={
+  start:{en:"PLAY GAME",es:"JUGAR"}, howto:{en:"HOW TO PLAY",es:"CÓMO JUGAR"},
+  bank:{en:"QUESTION BANK",es:"BANCO DE PREGUNTAS"}, settings:{en:"SETTINGS",es:"AJUSTES"},
+  resume:{en:"CONTINUE MATCH",es:"CONTINUAR PARTIDA"},
+  tagline:{en:"Explore the Bible. Collect the Champions. Win the Crown!",
+           es:"Explora la Biblia. Reúne a los Campeones. ¡Gana la Corona!"},
+  homeNote:{en:"A team Bible contest. Spin the wheel, answer from the Scriptures and collect all seven champions. Crown is the wildcard: it lets you choose, but you still have to answer.",
+            es:"Un concurso bíblico por equipos. Gira la ruleta, responde con las Escrituras y reúne a los siete campeones. Crown es el comodín: te deja elegir, pero igual tienes que responder."},
+  setup:{en:"Match setup",es:"Configuración de la partida"},
+  numTeams:{en:"Number of teams",es:"Número de equipos"},
+  teamName:{en:"Team name",es:"Nombre del equipo"}, color:{en:"Colour",es:"Color"},
+  language:{en:"Language",es:"Idioma"},
+  langHint:{en:"Changes the interface and the questions that are shown.",
+            es:"Cambia la interfaz y las preguntas que se muestran."},
+  difficulty:{en:"Difficulty",es:"Dificultad"},
+  timeLimit:{en:"Time per question",es:"Tiempo por pregunta"},
+  needed:{en:"Correct answers per champion",es:"Aciertos para conseguir un campeón"},
+  neededHint:{en:"How many correct answers in a subject win that champion. A crown challenge always wins it with one.",
+              es:"Cuántos aciertos en una categoría consiguen ese campeón. El reto de Crown lo consigue siempre con uno."},
+  available:{en:"questions available",es:"preguntas disponibles"},
+  startMatch:{en:"Start match",es:"Empezar partida"}, backHome:{en:"Home",es:"Inicio"},
+  spin:{en:"SPIN",es:"GIRAR"}, spinning:{en:"…",es:"…"},
+  turn:{en:"Turn",es:"Turno"}, score:{en:"Score",es:"Puntos"}, pts:{en:"pts",es:"pts"},
+  easy:{en:"Easy",es:"Fácil"}, medium:{en:"Medium",es:"Media"}, hard:{en:"Hard",es:"Difícil"},
+  mixed:{en:"Mixed",es:"Mixta"}, all:{en:"All",es:"Todas"},
+  correct:{en:"Correct!",es:"¡Correcto!"}, incorrect:{en:"Not quite",es:"Incorrecto"},
+  timeup:{en:"Time's up",es:"Se acabó el tiempo"},
+  answerWas:{en:"The answer was",es:"La respuesta era"},
+  next:{en:"Next team",es:"Siguiente equipo"}, continueB:{en:"Continue",es:"Continuar"},
+  unlocked:{en:"NEW CHAMPION UNLOCKED!",es:"¡NUEVO CAMPEÓN DESBLOQUEADO!"},
+  collect:{en:"Collect",es:"Reclamar"}, collected:{en:"Collected",es:"Conseguido"},
+  crownPower:{en:"CROWN POWER ACTIVATED!",es:"¡PODER DE CROWN ACTIVADO!"},
+  crownLanded:{en:"The wheel landed on Crown",es:"La ruleta cayó en Crown"},
+  crownPick:{en:"Choose the champion you want to win",es:"Elige el campeón que quieres conseguir"},
+  crownIntro:{en:"Answer one special question from that subject. Right, the champion is yours. Wrong, you lose the turn.",
+              es:"Responde una pregunta especial de esa categoría. Si aciertas, el campeón es tuyo. Si fallas, pierdes el turno."},
+  crownQuestion:{en:"Crown challenge",es:"Reto de Crown"},
+  crownMissed:{en:"The crown opportunity is lost",es:"Se pierde la oportunidad de Crown"},
+  winner:{en:"Champions",es:"Campeones"}, finalScore:{en:"Final score",es:"Puntuación final"},
+  summary:{en:"Match summary",es:"Resumen de la partida"},
+  playAgain:{en:"Play again",es:"Jugar otra vez"}, newGame:{en:"New game",es:"Partida nueva"},
+  teacher:{en:"Host panel",es:"Panel del anfitrión"},
+  pause:{en:"Pause",es:"Pausar"}, unpause:{en:"Resume",es:"Reanudar"}, paused:{en:"Paused",es:"En pausa"},
+  skip:{en:"Skip question",es:"Saltar pregunta"}, adjust:{en:"Adjust score",es:"Corregir puntuación"},
+  chars:{en:"Champions",es:"Campeones"}, activeTeam:{en:"Active team",es:"Equipo activo"},
+  review:{en:"Answer log",es:"Historial"}, restart:{en:"Restart match",es:"Reiniciar partida"},
+  exit:{en:"Exit to home",es:"Salir al inicio"},
+  sound:{en:"Sound effects",es:"Efectos de sonido"}, music:{en:"Music",es:"Música"},
+  volume:{en:"Volume",es:"Volumen"}, low:{en:"Low",es:"Bajo"}, high:{en:"High",es:"Alto"},
+  close:{en:"Close",es:"Cerrar"}, noLog:{en:"No answers yet.",es:"Todavía no hay respuestas."},
+  team:{en:"Team",es:"Equipo"}, characters:{en:"Champions",es:"Campeones"},
+  hits:{en:"Correct",es:"Aciertos"}, misses:{en:"Wrong",es:"Fallos"},
+  crowns:{en:"Crown wins",es:"Retos de Crown"},
+  addQ:{en:"New question",es:"Nueva pregunta"}, edit:{en:"Edit",es:"Editar"}, del:{en:"Delete",es:"Eliminar"},
+  save:{en:"Save",es:"Guardar"}, cancel:{en:"Cancel",es:"Cancelar"},
+  importT:{en:"Import",es:"Importar"}, exportT:{en:"Export",es:"Exportar"},
+  copy:{en:"Copy",es:"Copiar"}, copied:{en:"Copied",es:"Copiado"},
+  search:{en:"Search",es:"Buscar"}, category:{en:"Category",es:"Categoría"},
+  question:{en:"Question",es:"Pregunta"}, options:{en:"Options",es:"Opciones"},
+  answer:{en:"Correct answer",es:"Respuesta correcta"},
+  explanation:{en:"Explanation",es:"Explicación"}, scripture:{en:"Scripture",es:"Texto bíblico"},
+  verified:{en:"Verified",es:"Verificada"}, unverified:{en:"Needs review",es:"Por revisar"},
+  verifyHint:{en:"Mark a question as verified only after checking it against the Bible.",
+              es:"Marca una pregunta como verificada solo después de comprobarla con la Biblia."},
+  bothLangs:{en:"English text",es:"Texto en inglés"}, esText:{en:"Spanish text",es:"Texto en español"},
+  importHint:{en:"Paste JSON or CSV and press Import. CSV uses the same header as the export. Rows with one language are copied into both.",
+              es:"Pega JSON o CSV y pulsa Importar. El CSV usa la misma cabecera que la exportación. Las filas con un solo idioma se copian a los dos."},
+  exportHint:{en:"Copy this text and save it as a .json or .csv file.",
+              es:"Copia este texto y guárdalo como archivo .json o .csv."},
+  replaceAll:{en:"Replace whole bank",es:"Reemplazar todo el banco"},
+  merge:{en:"Add to bank",es:"Añadir al banco"},
+  restoreDefaults:{en:"Restore original bank",es:"Restaurar banco original"},
+  imported:{en:"questions imported",es:"preguntas importadas"},
+  badData:{en:"That text could not be read.",es:"No se pudo leer ese texto."},
+  saved:{en:"Saved",es:"Guardado"},
+  noQuestions:{en:"No questions match these filters.",es:"Ninguna pregunta coincide con estos filtros."},
+  shortBank:{en:"Few questions with this setup. Add more or change the difficulty.",
+             es:"Hay pocas preguntas con esta configuración. Añade más o cambia la dificultad."},
+  recycled:{en:"Reshuffled this subject's questions.",es:"Se barajaron de nuevo las preguntas de esta categoría."},
+  already:{en:"Already collected — this one only scores points.",
+           es:"Ya lo tienes — esta pregunta solo suma puntos."},
+  rulesTitle:{en:"How to play",es:"Cómo jugar"}, gotIt:{en:"Got it",es:"Entendido"},
+  howManyTeams:{en:"teams",es:"equipos"}, sec:{en:"s",es:"s"},
+  grant:{en:"Give",es:"Dar"}, revoke:{en:"Remove",es:"Quitar"},
+  shuffleOpts:{en:"Shuffle the options",es:"Barajar las opciones"},
+  fixedOpts:{en:"Keep A·B·C·D order",es:"Mantener el orden A·B·C·D"},
+  allWon:{en:"Every champion is already collected.",es:"Ya se consiguieron todos los campeones."},
+  lifelines:{en:"Lifelines",es:"Comodines"},
+  llOnce:{en:"One use each per match",es:"Un uso de cada uno por partida"},
+  llUsed:{en:"Used",es:"Usado"},
+  llScroll:{en:"Scroll",es:"Rollo"},
+  llScrollHint:{en:"Look it up in the Bible — 30 seconds more",es:"Búscalo en la Biblia: 30 segundos más"},
+  llAsk:{en:"Ask a team",es:"Consultar"},
+  llAskHint:{en:"15 seconds to ask another team",es:"15 segundos para consultar a otro equipo"},
+  consultTitle:{en:"Ask another team",es:"Consulta a otro equipo"},
+  consultSub:{en:"The clock is paused. Answer when you are ready.",
+              es:"El reloj está en pausa. Responde cuando estés listo."},
+  consultDone:{en:"Done",es:"Listo"}, llGiveBack:{en:"Return",es:"Devolver"},
+  motion:{en:"Animations",es:"Animaciones"}, motionFull:{en:"Full",es:"Completas"},
+  motionCalm:{en:"Reduced",es:"Reducidas"},
+  fullscreen:{en:"Full screen",es:"Pantalla completa"},
+  enterFs:{en:"Enter full screen",es:"Entrar en pantalla completa"},
+  exitFs:{en:"Leave full screen",es:"Salir de pantalla completa"},
+  settingsNote:{en:"These settings are remembered on this device.",
+                es:"Estos ajustes se recuerdan en este dispositivo."},
+  on:{en:"on",es:"sí"}, off:{en:"off",es:"no"},
+  confirmSure:{en:"Are you sure? This cannot be undone.",es:"¿Seguro? Esto no se puede deshacer."},
+  yes:{en:"Yes, do it",es:"Sí, hacerlo"}, no:{en:"No",es:"No"},
+  toUnlock:{en:"to the champion",es:"para el campeón"},
+  progress:{en:"Progress",es:"Progreso"},
+  reviewFlag:{en:"questions still need review",es:"preguntas siguen pendientes de revisión"},
+  onlyVerified:{en:"Only verified questions",es:"Solo preguntas verificadas"},
+  anyQ:{en:"All questions",es:"Todas las preguntas"}
+};
+var LANG="es";
+var T={};
+function setLang(l){
+  LANG=(l==="en"||l==="es")?l:"es";
+  var o={}; Object.keys(STR).forEach(function(k){ o[k]=STR[k][LANG]||STR[k].en; }); T=o;
+}
+setLang("es");
+/* a cast member's localized name / subject */
+function cname(c){ return (c&&c.name&&(c.name[LANG]||c.name.en))||""; }
+function subj(c){ return (c&&c.subject&&(c.subject[LANG]||c.subject.en))||""; }
+
+/* ============================ question bank ============================ */
+/* B(category, difficulty, answerIndex,
+     EN[question, A, B, C, D, explanation, scripture],
+     ES[question, A, B, C, D, explanation, scripture])
+   The answer index is the same in both languages, so the two option lists must stay in step.
+   `verified:true` means the wording was checked against the Bible text it cites. */
+function B(cat,dif,a,en,es){
+  return {cat:cat,dif:dif,a:a,verified:true,
+    en:{q:en[0],o:[en[1],en[2],en[3],en[4]],e:en[5],ref:en[6]||""},
+    es:{q:es[0],o:[es[1],es[2],es[3],es[4]],e:es[5],ref:es[6]||""}};
+}
+/* R() is the same row marked as needing review: doctrinal or interpretive wording that the
+   host should check against the publications before it is used in a match. */
+function R(cat,dif,a,en,es){ var q=B(cat,dif,a,en,es); q.verified=false; return q; }
+var SEED=[
+// ---------- BIBLE PROPHECIES · Ezra, the Vision Keeper ----------
+B("prophecy","easy",1,
+ ["Which prophet foretold that Bethlehem would be the birthplace of the promised ruler?","Isaiah","Micah","Jeremiah","Ezekiel","Micah wrote that out of Bethlehem would come the one to become ruler in Israel.","Micah 5:2"],
+ ["¿Qué profeta predijo que Belén sería el lugar de nacimiento del gobernante prometido?","Isaías","Miqueas","Jeremías","Ezequiel","Miqueas escribió que de Belén saldría el que llegaría a ser gobernante en Israel.","Miqueas 5:2"]),
+B("prophecy","easy",2,
+ ["Which prophet was thrown into the lions' pit for praying to Jehovah?","Jeremiah","Elisha","Daniel","Hosea","King Darius had Daniel thrown in, and God shut the lions' mouths.","Daniel 6:16"],
+ ["¿Qué profeta fue arrojado al foso de los leones por orar a Jehová?","Jeremías","Eliseo","Daniel","Oseas","El rey Darío mandó arrojar a Daniel, y Dios cerró la boca de los leones.","Daniel 6:16"]),
+B("prophecy","easy",0,
+ ["Which prophet announced that a young woman would give birth to a son called Immanuel?","Isaiah","Joel","Amos","Malachi","Isaiah gave this sign to the house of David.","Isaiah 7:14"],
+ ["¿Qué profeta anunció que una joven daría a luz un hijo llamado Emanuel?","Isaías","Joel","Amós","Malaquías","Isaías dio esta señal a la casa de David.","Isaías 7:14"]),
+B("prophecy","easy",3,
+ ["Which prophet saw a valley full of dry bones that came to life?","Daniel","Jonah","Zechariah","Ezekiel","Jehovah showed Ezekiel the valley of dry bones as a picture of Israel being restored.","Ezekiel 37:1-10"],
+ ["¿Qué profeta vio un valle lleno de huesos secos que cobraron vida?","Daniel","Jonás","Zacarías","Ezequiel","Jehová le mostró a Ezequiel el valle de huesos secos como figura de la restauración de Israel.","Ezequiel 37:1-10"]),
+B("prophecy","easy",1,
+ ["Which prophet was swallowed by a huge fish?","Elijah","Jonah","Nahum","Habakkuk","Jonah spent three days and three nights inside the fish.","Jonah 1:17"],
+ ["¿Qué profeta fue tragado por un gran pez?","Elías","Jonás","Nahúm","Habacuc","Jonás pasó tres días y tres noches dentro del pez.","Jonás 1:17"]),
+B("prophecy","easy",2,
+ ["What did Jesus foretell about the temple in Jerusalem?","That it would be enlarged","That it would be moved","That not one stone would be left upon another","That it would never be touched","Jesus foretold its complete destruction, which happened in 70 C.E.","Matthew 24:2"],
+ ["¿Qué predijo Jesús sobre el templo de Jerusalén?","Que sería ampliado","Que sería trasladado","Que no quedaría piedra sobre piedra","Que nunca sería tocado","Jesús predijo su destrucción total, que ocurrió en el año 70 de nuestra era.","Mateo 24:2"]),
+B("prophecy","easy",0,
+ ["Which prophet challenged the prophets of Baal on Mount Carmel?","Elijah","Elisha","Samuel","Nathan","Fire came down from heaven and consumed Elijah's offering.","1 Kings 18:36-38"],
+ ["¿Qué profeta desafió a los profetas de Baal en el monte Carmelo?","Elías","Eliseo","Samuel","Natán","Bajó fuego del cielo y consumió la ofrenda de Elías.","1 Reyes 18:36-38"]),
+B("prophecy","medium",1,
+ ["In Nebuchadnezzar's dream, what was the head of the great image made of?","Silver","Gold","Iron","Clay","Daniel explained that the head of gold represented Babylon.","Daniel 2:32,38"],
+ ["En el sueño de Nabucodonosor, ¿de qué estaba hecha la cabeza de la gran estatua?","De plata","De oro","De hierro","De barro","Daniel explicó que la cabeza de oro representaba a Babilonia.","Daniel 2:32, 38"]),
+B("prophecy","medium",2,
+ ["What struck the image of Nebuchadnezzar's dream and crushed it?","A lightning bolt","A great wind","A stone cut out of a mountain, not by human hands","An iron sword","The stone became a huge mountain that filled the whole earth.","Daniel 2:34,35"],
+ ["¿Qué golpeó la estatua del sueño de Nabucodonosor y la hizo pedazos?","Un rayo","Un gran viento","Una piedra cortada de una montaña, no con manos","Una espada de hierro","La piedra llegó a ser una gran montaña que llenó toda la tierra.","Daniel 2:34, 35"]),
+B("prophecy","medium",0,
+ ["Which prophecy says the Messiah would be pierced for our transgressions?","Isaiah 53","Psalm 1","Hosea 4","Joel 1","Isaiah described the suffering servant centuries before Jesus was born.","Isaiah 53:5"],
+ ["¿Qué profecía dice que el Mesías sería traspasado por nuestras transgresiones?","Isaías 53","Salmo 1","Oseas 4","Joel 1","Isaías describió al siervo sufriente siglos antes de que naciera Jesús.","Isaías 53:5"]),
+B("prophecy","medium",1,
+ ["Which prophet foretold that the exile in Babylon would last seventy years?","Ezekiel","Jeremiah","Obadiah","Zephaniah","Jeremiah wrote that these nations would serve the king of Babylon seventy years.","Jeremiah 25:11"],
+ ["¿Qué profeta predijo que el destierro en Babilonia duraría setenta años?","Ezequiel","Jeremías","Abdías","Sofonías","Jeremías escribió que esas naciones servirían al rey de Babilonia setenta años.","Jeremías 25:11"]),
+B("prophecy","medium",3,
+ ["Which prophet was told to take Gomer as his wife as a living lesson for Israel?","Amos","Micah","Joel","Hosea","Hosea's marriage pictured Jehovah's loyalty toward unfaithful Israel.","Hosea 1:2,3"],
+ ["¿A qué profeta se le mandó tomar a Gómer por esposa como lección viviente para Israel?","Amós","Miqueas","Joel","Oseas","El matrimonio de Oseas representó la lealtad de Jehová hacia el Israel infiel.","Oseas 1:2, 3"]),
+B("prophecy","medium",2,
+ ["In Revelation, what is the name of the place where the kings of the earth are gathered?","Babylon the Great","Gehenna","Har-Magedon (Armageddon)","Patmos","Revelation names it in Hebrew as Har-Magedon.","Revelation 16:16"],
+ ["En Apocalipsis, ¿cómo se llama el lugar donde se reúnen los reyes de la tierra?","Babilonia la Grande","Gehena","Armagedón","Patmos","Apocalipsis dice que en hebreo ese lugar se llama Armagedón.","Apocalipsis 16:16"]),
+B("prophecy","medium",0,
+ ["Which prophet saw a vision of a flying scroll?","Zechariah","Nahum","Haggai","Jonah","Zechariah saw a flying scroll carrying a curse against thieves and false swearers.","Zechariah 5:1-3"],
+ ["¿Qué profeta tuvo la visión de un rollo que volaba?","Zacarías","Nahúm","Ageo","Jonás","Zacarías vio un rollo volador que llevaba una maldición contra ladrones y perjuros.","Zacarías 5:1-3"]),
+B("prophecy","hard",1,
+ ["At Pentecost, Peter said the outpouring of holy spirit fulfilled the words of which prophet?","Daniel","Joel","Isaiah","Malachi","Peter said: This is what was said through the prophet Joel.","Acts 2:16,17"],
+ ["En Pentecostés, Pedro dijo que el derramamiento del espíritu santo cumplía las palabras de ¿qué profeta?","Daniel","Joel","Isaías","Malaquías","Pedro dijo: Esto es lo que se dijo por medio del profeta Joel.","Hechos 2:16, 17"]),
+B("prophecy","hard",2,
+ ["How many weeks does Daniel's prophecy about the coming of the Messiah cover?","Twelve","Forty","Seventy","Seven","Daniel wrote that seventy weeks were determined upon the people and the holy city.","Daniel 9:24"],
+ ["¿Cuántas semanas abarca la profecía de Daniel sobre la llegada del Mesías?","Doce","Cuarenta","Setenta","Siete","Daniel escribió que setenta semanas estaban determinadas sobre el pueblo y la ciudad santa.","Daniel 9:24"]),
+B("prophecy","hard",3,
+ ["Which prophet foretold that the king would come to Jerusalem riding on a donkey?","Amos","Ezekiel","Habakkuk","Zechariah","Zechariah said the king would come humble and riding on a donkey, on a colt.","Zechariah 9:9"],
+ ["¿Qué profeta predijo que el rey llegaría a Jerusalén montado en un asno?","Amós","Ezequiel","Habacuc","Zacarías","Zacarías dijo que el rey vendría humilde y montado en un asno, en una cría de asna.","Zacarías 9:9"]),
+B("prophecy","hard",1,
+ ["In Daniel chapter 7, where did the four great beasts come up from?","From a mountain","From the sea","From a river","From the desert","Daniel saw four huge beasts come up out of the sea, each different from the others.","Daniel 7:3"],
+ ["En Daniel capítulo 7, ¿de dónde salieron las cuatro grandes bestias?","De una montaña","Del mar","De un río","Del desierto","Daniel vio salir del mar cuatro enormes bestias, cada una distinta de la otra.","Daniel 7:3"]),
+B("prophecy","hard",0,
+ ["Which king did Isaiah name long before his birth as the one who would free the exiles?","Cyrus","Darius","Belshazzar","Artaxerxes","Isaiah called Cyrus by name and said he would order Jerusalem rebuilt.","Isaiah 44:28; 45:1"],
+ ["¿A qué rey nombró Isaías mucho antes de su nacimiento como el que liberaría a los desterrados?","Ciro","Darío","Belsasar","Artajerjes","Isaías llamó a Ciro por nombre y dijo que él mandaría reconstruir Jerusalén.","Isaías 44:28; 45:1"]),
+B("prophecy","hard",2,
+ ["How many are sealed from the tribes of Israel according to Revelation?","12,000","70,000","144,000","1,000","John heard the number of those sealed: 144,000.","Revelation 7:4"],
+ ["¿Cuántos son sellados de las tribus de Israel según Apocalipsis?","12.000","70.000","144.000","1.000","Juan oyó el número de los sellados: 144.000.","Apocalipsis 7:4"]),
+// ---------- BIBLE HISTORY · Caleb, the Time Guardian ----------
+B("history","easy",0,
+ ["Who was the first man Jehovah created?","Adam","Abel","Enoch","Noah","Jehovah formed Adam from the dust of the ground and he came to be a living person.","Genesis 2:7"],
+ ["¿Quién fue el primer hombre que creó Jehová?","Adán","Abel","Enoc","Noé","Jehová formó a Adán del polvo de la tierra y llegó a ser una persona viviente.","Génesis 2:7"]),
+B("history","easy",2,
+ ["Who built the ark that survived the Flood?","Abraham","Enoch","Noah","Lot","Jehovah told Noah to build an ark of resinous wood for his family and the animals.","Genesis 6:14"],
+ ["¿Quién construyó el arca que sobrevivió al Diluvio?","Abrahán","Enoc","Noé","Lot","Jehová le mandó a Noé construir un arca de madera resinosa para su familia y los animales.","Génesis 6:14"]),
+B("history","easy",1,
+ ["Who led the Israelites out of slavery in Egypt?","Joshua","Moses","Aaron","Samuel","Jehovah sent Moses to Pharaoh to bring his people out of Egypt.","Exodus 3:10"],
+ ["¿Quién sacó a los israelitas de la esclavitud en Egipto?","Josué","Moisés","Aarón","Samuel","Jehová envió a Moisés ante el faraón para sacar a su pueblo de Egipto.","Éxodo 3:10"]),
+B("history","easy",3,
+ ["Which young shepherd defeated the giant Goliath?","Jonathan","Saul","Samson","David","David struck Goliath down with a stone from his sling.","1 Samuel 17:49"],
+ ["¿Qué joven pastor venció al gigante Goliat?","Jonatán","Saúl","Sansón","David","David derribó a Goliat con una piedra de su honda.","1 Samuel 17:49"]),
+B("history","easy",0,
+ ["Who was the first king of Israel?","Saul","David","Solomon","Samuel","Samuel poured oil on Saul's head and anointed him as leader.","1 Samuel 10:1"],
+ ["¿Quién fue el primer rey de Israel?","Saúl","David","Salomón","Samuel","Samuel derramó aceite sobre la cabeza de Saúl y lo ungió como caudillo.","1 Samuel 10:1"]),
+B("history","easy",1,
+ ["Who built the first temple in Jerusalem?","David","Solomon","Hezekiah","Josiah","Solomon began building the house of Jehovah in the fourth year of his reign.","1 Kings 6:1"],
+ ["¿Quién construyó el primer templo de Jerusalén?","David","Salomón","Ezequías","Josías","Salomón empezó a construir la casa de Jehová en el cuarto año de su reinado.","1 Reyes 6:1"]),
+B("history","easy",2,
+ ["Which sea did the Israelites cross on dry ground?","The Dead Sea","The Sea of Galilee","The Red Sea","The Mediterranean","Jehovah divided the waters and Israel walked through on dry land.","Exodus 14:21,22"],
+ ["¿Qué mar cruzaron los israelitas por tierra seca?","El mar Muerto","El mar de Galilea","El mar Rojo","El Mediterráneo","Jehová dividió las aguas e Israel pasó por tierra seca.","Éxodo 14:21, 22"]),
+B("history","medium",1,
+ ["How many days and nights did the rain of the Flood last?","Seven","Forty","A hundred","Three hundred","It rained on the earth for forty days and forty nights.","Genesis 7:12"],
+ ["¿Cuántos días y noches duró la lluvia del Diluvio?","Siete","Cuarenta","Cien","Trescientos","Llovió sobre la tierra cuarenta días y cuarenta noches.","Génesis 7:12"]),
+B("history","medium",0,
+ ["Who was sold by his brothers and ended up governing Egypt?","Joseph","Benjamin","Judah","Reuben","Pharaoh put Joseph in charge of all the land of Egypt.","Genesis 37:28; 41:41"],
+ ["¿Quién fue vendido por sus hermanos y acabó gobernando Egipto?","José","Benjamín","Judá","Rubén","El faraón puso a José al frente de toda la tierra de Egipto.","Génesis 37:28; 41:41"]),
+B("history","medium",2,
+ ["Who succeeded Moses and led Israel into the Promised Land?","Caleb","Aaron","Joshua","Gideon","After Moses died, Jehovah told Joshua to cross the Jordan with the people.","Joshua 1:1,2"],
+ ["¿Quién sucedió a Moisés y llevó a Israel a la Tierra Prometida?","Caleb","Aarón","Josué","Gedeón","Tras la muerte de Moisés, Jehová mandó a Josué cruzar el Jordán con el pueblo.","Josué 1:1, 2"]),
+B("history","medium",3,
+ ["Which judge defeated the Midianites with only three hundred men?","Samson","Jephthah","Ehud","Gideon","Jehovah reduced Gideon's army to three hundred so the victory would clearly be God's.","Judges 7:7"],
+ ["¿Qué juez venció a los madianitas con solo trescientos hombres?","Sansón","Jefté","Ehúd","Gedeón","Jehová redujo el ejército de Gedeón a trescientos para que la victoria fuera claramente de Dios.","Jueces 7:7"]),
+B("history","medium",1,
+ ["Which queen risked her life to save her people from destruction?","Jezebel","Esther","Athaliah","Vashti","Esther pleaded before the king for her own life and that of her people.","Esther 7:3,4"],
+ ["¿Qué reina arriesgó su vida para salvar a su pueblo de la destrucción?","Jezabel","Ester","Atalía","Vasti","Ester suplicó ante el rey por su propia vida y la de su pueblo.","Ester 7:3, 4"]),
+B("history","medium",0,
+ ["Which Babylonian king conquered Jerusalem and took the Jews captive?","Nebuchadnezzar","Cyrus","Belshazzar","Sennacherib","Nebuchadnezzar came against Jerusalem with his whole army and besieged it.","2 Kings 25:1"],
+ ["¿Qué rey babilonio conquistó Jerusalén y llevó cautivos a los judíos?","Nabucodonosor","Ciro","Belsasar","Senaquerib","Nabucodonosor vino contra Jerusalén con todo su ejército y la sitió.","2 Reyes 25:1"]),
+B("history","medium",2,
+ ["Who directed the rebuilding of Jerusalem's walls after the exile?","Ezra","Zerubbabel","Nehemiah","Haggai","The wall was finished in fifty-two days under Nehemiah's direction.","Nehemiah 6:15"],
+ ["¿Quién dirigió la reconstrucción de las murallas de Jerusalén después del destierro?","Esdras","Zorobabel","Nehemías","Ageo","La muralla se terminó en cincuenta y dos días bajo la dirección de Nehemías.","Nehemías 6:15"]),
+B("history","hard",1,
+ ["How long did the Israelites dwell in Egypt?","Two hundred years","Four hundred and thirty years","Seventy years","A thousand years","The dwelling of the Israelites in Egypt was 430 years.","Exodus 12:40,41"],
+ ["¿Cuánto tiempo vivieron los israelitas en Egipto?","Doscientos años","Cuatrocientos treinta años","Setenta años","Mil años","La estancia de los israelitas en Egipto fue de 430 años.","Éxodo 12:40, 41"]),
+B("history","hard",0,
+ ["Which priest raised the boy Samuel at the sanctuary?","Eli","Zadok","Abiathar","Phinehas","Young Samuel served Jehovah before Eli.","1 Samuel 3:1"],
+ ["¿Qué sacerdote crió al niño Samuel en el santuario?","Elí","Sadoc","Abiatar","Finehás","El joven Samuel servía a Jehová delante de Elí.","1 Samuel 3:1"]),
+B("history","hard",3,
+ ["Which king of Judah reigned fifty-five years, acted very wickedly, and later humbled himself?","Ahaz","Josiah","Jehoiakim","Manasseh","Manasseh humbled himself greatly before Jehovah and his prayer was heard.","2 Chronicles 33:1,12,13"],
+ ["¿Qué rey de Judá reinó cincuenta y cinco años, actuó muy mal y después se humilló?","Acaz","Josías","Jehoiaquim","Manasés","Manasés se humilló mucho ante Jehová y su oración fue escuchada.","2 Crónicas 33:1, 12, 13"]),
+B("history","hard",2,
+ ["Which Roman governor handed Jesus over to be executed?","Herod Antipas","Felix","Pontius Pilate","Festus","Pilate released Barabbas and handed Jesus over to be executed.","Matthew 27:26"],
+ ["¿Qué gobernador romano entregó a Jesús para ser ejecutado?","Herodes Antipas","Félix","Poncio Pilato","Festo","Pilato soltó a Barrabás y entregó a Jesús para que fuera ejecutado.","Mateo 27:26"]),
+B("history","hard",1,
+ ["About how many people were baptized on the day of Pentecost of 33 C.E.?","Five hundred","Three thousand","Twelve","Seventy","About 3,000 people accepted the word gladly and were baptized that day.","Acts 2:41"],
+ ["¿Cuántas personas se bautizaron aproximadamente el día de Pentecostés del año 33?","Quinientas","Tres mil","Doce","Setenta","Unas 3.000 personas aceptaron de buena gana la palabra y se bautizaron ese día.","Hechos 2:41"]),
+B("history","hard",0,
+ ["Who was chosen to replace Judas Iscariot among the twelve apostles?","Matthias","Barnabas","Stephen","Silas","The lot fell on Matthias and he was counted along with the eleven apostles.","Acts 1:26"],
+ ["¿Quién fue elegido para reemplazar a Judas Iscariote entre los doce apóstoles?","Matías","Bernabé","Esteban","Silas","La suerte cayó sobre Matías y fue contado junto con los once apóstoles.","Hechos 1:26"]),
+// ---------- GEOGRAPHY · Jordan, the Explorer ----------
+B("geography","easy",1,
+ ["In which river was Jesus baptized?","The Euphrates","The Jordan","The Nile","The Tigris","John baptized Jesus in the Jordan River.","Mark 1:9"],
+ ["¿En qué río fue bautizado Jesús?","El Éufrates","El Jordán","El Nilo","El Tigris","Juan bautizó a Jesús en el río Jordán.","Marcos 1:9"]),
+B("geography","easy",2,
+ ["In which city was Jesus born?","Nazareth","Jerusalem","Bethlehem","Capernaum","Joseph went up to Bethlehem, the city of David, and there Jesus was born.","Luke 2:4-7"],
+ ["¿En qué ciudad nació Jesús?","Nazaret","Jerusalén","Belén","Capernaúm","José subió a Belén, la ciudad de David, y allí nació Jesús.","Lucas 2:4-7"]),
+B("geography","easy",0,
+ ["In which town did Jesus grow up?","Nazareth","Bethany","Jericho","Cana","After returning from Egypt the family settled in Nazareth of Galilee.","Matthew 2:23"],
+ ["¿En qué pueblo creció Jesús?","Nazaret","Betania","Jericó","Caná","Al volver de Egipto, la familia se estableció en Nazaret de Galilea.","Mateo 2:23"]),
+B("geography","easy",3,
+ ["On which mountain did Moses receive the Law?","Mount Carmel","Mount Nebo","Mount Zion","Mount Sinai","Jehovah came down on Mount Sinai and called Moses to the top.","Exodus 19:20"],
+ ["¿En qué monte recibió Moisés la Ley?","El monte Carmelo","El monte Nebo","El monte Sion","El monte Sinaí","Jehová bajó sobre el monte Sinaí y llamó a Moisés a la cumbre.","Éxodo 19:20"]),
+B("geography","easy",1,
+ ["Which sea does the Bible also call the Salt Sea?","The Sea of Galilee","The Dead Sea","The Red Sea","The Great Sea","Genesis identifies the Valley of Siddim with the Salt Sea.","Genesis 14:3"],
+ ["¿A qué mar llama la Biblia también el mar Salado?","El mar de Galilea","El mar Muerto","El mar Rojo","El mar Grande","Génesis identifica el valle de Sidim con el mar Salado.","Génesis 14:3"]),
+B("geography","easy",2,
+ ["Beside which sea did Jesus call Peter and Andrew?","The Dead Sea","The Red Sea","The Sea of Galilee","The Adriatic","Walking beside the Sea of Galilee, Jesus saw two brothers casting their nets.","Matthew 4:18"],
+ ["¿Junto a qué mar llamó Jesús a Pedro y Andrés?","El mar Muerto","El mar Rojo","El mar de Galilea","El Adriático","Caminando junto al mar de Galilea, Jesús vio a dos hermanos echando las redes.","Mateo 4:18"]),
+B("geography","easy",0,
+ ["In which garden did Jehovah place the first man?","Eden","Gethsemane","Carmel","Sharon","Jehovah planted a garden in Eden, toward the east, and placed the man there.","Genesis 2:8"],
+ ["¿En qué jardín colocó Jehová al primer hombre?","Edén","Getsemaní","Carmelo","Sarón","Jehová plantó un jardín en Edén, hacia el este, y allí puso al hombre.","Génesis 2:8"]),
+B("geography","medium",1,
+ ["Which two cities were destroyed with fire and sulphur?","Tyre and Sidon","Sodom and Gomorrah","Nineveh and Babylon","Jericho and Ai","Jehovah made fire and sulphur rain down on Sodom and Gomorrah.","Genesis 19:24"],
+ ["¿Qué dos ciudades fueron destruidas con fuego y azufre?","Tiro y Sidón","Sodoma y Gomorra","Nínive y Babilonia","Jericó y Ai","Jehová hizo llover fuego y azufre sobre Sodoma y Gomorra.","Génesis 19:24"]),
+B("geography","medium",3,
+ ["On which mountains did the ark come to rest?","The Lebanon mountains","Mount Hermon","The mountains of Moab","The mountains of Ararat","In the seventh month the ark came to rest on the mountains of Ararat.","Genesis 8:4"],
+ ["¿Sobre qué montañas se posó el arca?","Los montes del Líbano","El monte Hermón","Los montes de Moab","Las montañas de Ararat","En el mes séptimo el arca se posó sobre las montañas de Ararat.","Génesis 8:4"]),
+B("geography","medium",0,
+ ["Saul was on the road to which city when a light flashed around him?","Damascus","Antioch","Corinth","Ephesus","As he was approaching Damascus, a light from heaven flashed around him.","Acts 9:3"],
+ ["¿Camino de qué ciudad iba Saulo cuando lo rodeó una luz?","Damasco","Antioquía","Corinto","Éfeso","Cuando se acercaba a Damasco, una luz del cielo lo rodeó.","Hechos 9:3"]),
+B("geography","medium",2,
+ ["On which island was Paul shipwrecked on his way to Rome?","Cyprus","Crete","Malta","Patmos","Once safe, they learned that the island was called Malta.","Acts 28:1"],
+ ["¿En qué isla naufragó Pablo camino de Roma?","Chipre","Creta","Malta","Patmos","Ya a salvo, supieron que la isla se llamaba Malta.","Hechos 28:1"]),
+B("geography","medium",1,
+ ["On which island was the apostle John when he received Revelation?","Rhodes","Patmos","Samos","Cyprus","John was on the island of Patmos for speaking about God and about Jesus.","Revelation 1:9"],
+ ["¿En qué isla estaba el apóstol Juan cuando recibió Apocalipsis?","Rodas","Patmos","Samos","Chipre","Juan estaba en la isla de Patmos por hablar de Dios y de Jesús.","Apocalipsis 1:9"]),
+B("geography","medium",3,
+ ["From which city did Abraham's family originally come?","Haran","Damascus","Hebron","Ur of the Chaldeans","Terah took his family and left Ur of the Chaldeans.","Genesis 11:31"],
+ ["¿De qué ciudad era originalmente la familia de Abrahán?","Harán","Damasco","Hebrón","Ur de los caldeos","Taré tomó a su familia y salió de Ur de los caldeos.","Génesis 11:31"]),
+B("geography","medium",0,
+ ["Which city's walls fell after Israel marched around them?","Jericho","Ai","Gibeon","Lachish","The people shouted, and the wall of Jericho fell flat.","Joshua 6:20"],
+ ["¿Las murallas de qué ciudad cayeron después de que Israel marchara a su alrededor?","Jericó","Ai","Gabaón","Laquis","El pueblo gritó y la muralla de Jericó se vino abajo.","Josué 6:20"]),
+B("geography","hard",2,
+ ["In which city were the disciples first called Christians?","Jerusalem","Rome","Antioch","Caesarea","It was in Antioch that the disciples were by divine providence called Christians.","Acts 11:26"],
+ ["¿En qué ciudad se llamó cristianos a los discípulos por primera vez?","Jerusalén","Roma","Antioquía","Cesarea","Fue en Antioquía donde por providencia divina se llamó cristianos a los discípulos.","Hechos 11:26"]),
+B("geography","hard",1,
+ ["From which mountain did Moses see the Promised Land before he died?","Mount Sinai","Mount Nebo","Mount Tabor","Mount Gerizim","Moses went up Mount Nebo and Jehovah showed him the whole land.","Deuteronomy 34:1"],
+ ["¿Desde qué monte vio Moisés la Tierra Prometida antes de morir?","El monte Sinaí","El monte Nebo","El monte Tabor","El monte Guerizim","Moisés subió al monte Nebo y Jehová le mostró toda la tierra.","Deuteronomio 34:1"]),
+B("geography","hard",0,
+ ["Beside which river was Ezekiel when he saw the visions of God?","The Chebar","The Jordan","The Nile","The Orontes","Ezekiel was among the exiles by the river Chebar when the heavens were opened.","Ezekiel 1:1"],
+ ["¿Junto a qué río estaba Ezequiel cuando vio las visiones de Dios?","El Quebar","El Jordán","El Nilo","El Orontes","Ezequiel estaba entre los desterrados junto al río Quebar cuando se abrieron los cielos.","Ezequiel 1:1"]),
+B("geography","hard",3,
+ ["What is the name of the place where Jesus was executed, called Skull Place?","Bethphage","Siloam","Kidron","Golgotha","He went out to the so-called Skull Place, which in Hebrew is called Golgotha.","John 19:17"],
+ ["¿Cómo se llama el lugar donde ejecutaron a Jesús, llamado Lugar del Cráneo?","Betfagé","Siloé","Cedrón","Gólgota","Salió al llamado Lugar del Cráneo, que en hebreo se llama Gólgota.","Juan 19:17"]),
+B("geography","hard",1,
+ ["How far was the Mount of Olives from Jerusalem?","A day's journey","A sabbath day's journey","Three days' journey","Ten kilometres","The account says it was a sabbath day's journey away.","Acts 1:12"],
+ ["¿A qué distancia estaba el monte de los Olivos de Jerusalén?","Un día de camino","El camino de un sábado","Tres días de camino","Diez kilómetros","El relato dice que estaba a la distancia del camino de un sábado.","Hechos 1:12"]),
+B("geography","hard",2,
+ ["To how many congregations in Asia was the book of Revelation addressed?","Three","Five","Seven","Twelve","John was told to write in a scroll and send it to the seven congregations.","Revelation 1:11"],
+ ["¿A cuántas congregaciones de Asia se dirigió el libro de Apocalipsis?","Tres","Cinco","Siete","Doce","A Juan se le mandó escribir en un rollo y enviarlo a las siete congregaciones.","Apocalipsis 1:11"]),
+// ---------- ART · Miriam, the Melody Maker ----------
+B("art","easy",1,
+ ["Which instrument did David play to calm King Saul?","The trumpet","The harp","The flute","The cymbals","Whenever David played the harp, Saul found relief.","1 Samuel 16:23"],
+ ["¿Qué instrumento tocaba David para calmar al rey Saúl?","La trompeta","El arpa","La flauta","Los címbalos","Cada vez que David tocaba el arpa, Saúl se sentía aliviado.","1 Samuel 16:23"]),
+B("art","easy",2,
+ ["Which Bible book is a collection of songs of praise?","Proverbs","Ecclesiastes","Psalms","Job","The Psalms close by calling on everything that breathes to praise Jah.","Psalm 150:6"],
+ ["¿Qué libro de la Biblia es una colección de canciones de alabanza?","Proverbios","Eclesiastés","Salmos","Job","Los Salmos terminan invitando a todo lo que respira a alabar a Jah.","Salmo 150:6"]),
+B("art","easy",0,
+ ["Who led the women with tambourines and dancing after the crossing of the Red Sea?","Miriam","Deborah","Hannah","Abigail","Miriam the prophetess took a tambourine and all the women followed her.","Exodus 15:20"],
+ ["¿Quién dirigió a las mujeres con panderetas y danzas tras el cruce del mar Rojo?","Míriam","Débora","Ana","Abigail","Míriam la profetisa tomó una pandereta y todas las mujeres la siguieron.","Éxodo 15:20"]),
+B("art","easy",3,
+ ["Which instruments did the priests sound as Israel marched around Jericho?","Harps","Cymbals","Flutes","Rams' horns","Seven priests carried seven rams' horns before the ark.","Joshua 6:4"],
+ ["¿Qué instrumentos tocaron los sacerdotes mientras Israel marchaba alrededor de Jericó?","Arpas","Címbalos","Flautas","Cuernos de carnero","Siete sacerdotes llevaban siete cuernos de carnero delante del arca.","Josué 6:4"]),
+B("art","easy",1,
+ ["Which Bible book is a poem of love between a shepherd and a young woman?","Lamentations","The Song of Solomon","Ruth","Esther","Its opening words call it the most beautiful of songs, Solomon's.","Song of Solomon 1:1"],
+ ["¿Qué libro de la Biblia es un poema de amor entre un pastor y una joven?","Lamentaciones","El Cantar de los Cantares","Rut","Ester","Sus primeras palabras lo llaman el más hermoso de los cantares, el de Salomón.","El Cantar de los Cantares 1:1"]),
+B("art","easy",2,
+ ["Who is named as the author of most of the book of Proverbs?","David","Moses","Solomon","Agur","The book opens: The proverbs of Solomon, son of David, king of Israel.","Proverbs 1:1"],
+ ["¿Quién aparece como autor de la mayor parte del libro de Proverbios?","David","Moisés","Salomón","Agur","El libro empieza: Los proverbios de Salomón, hijo de David, rey de Israel.","Proverbios 1:1"]),
+B("art","easy",0,
+ ["Whom did Jehovah fill with skill to design the work of the tabernacle?","Bezalel","Hiram","Joab","Eleazar","Jehovah filled Bezalel with wisdom and skill for every kind of craftsmanship.","Exodus 31:2-5"],
+ ["¿A quién llenó Jehová de habilidad para diseñar la obra del tabernáculo?","Bezalel","Hiram","Joab","Eleazar","Jehová llenó a Bezalel de sabiduría y pericia para toda clase de artesanía.","Éxodo 31:2-5"]),
+B("art","medium",1,
+ ["How many Levites did David appoint to praise Jehovah with instruments?","Four hundred","Four thousand","Twelve","Seventy","David said four thousand were to praise Jehovah with the instruments he had made.","1 Chronicles 23:5"],
+ ["¿A cuántos levitas asignó David para alabar a Jehová con instrumentos?","Cuatrocientos","Cuatro mil","Doce","Setenta","David dijo que cuatro mil alabarían a Jehová con los instrumentos que él había hecho.","1 Crónicas 23:5"]),
+B("art","medium",2,
+ ["According to Psalm 150, with what should Jehovah be praised?","Only with the voice","In silence","With the horn, the harp and the stringed instrument","Only with cymbals","Psalm 150 lists horn, harp, tambourine, strings, pipe and cymbals.","Psalm 150:3-5"],
+ ["Según el Salmo 150, ¿con qué se debe alabar a Jehová?","Solo con la voz","En silencio","Con el cuerno, el arpa y el instrumento de cuerda","Solo con címbalos","El Salmo 150 menciona cuerno, arpa, pandereta, cuerdas, flauta y címbalos.","Salmo 150:3-5"]),
+B("art","medium",0,
+ ["What did Jesus and his apostles do after the last meal, before going out?","They sang praises","They played harps","They danced","They read a scroll","After singing praises they went out to the Mount of Olives.","Matthew 26:30"],
+ ["¿Qué hicieron Jesús y sus apóstoles después de la última cena, antes de salir?","Cantaron alabanzas","Tocaron arpas","Danzaron","Leyeron un rollo","Después de cantar alabanzas salieron al monte de los Olivos.","Mateo 26:30"]),
+B("art","medium",3,
+ ["What was the ark of the covenant made of?","Solid silver","Bronze","Stone","Acacia wood overlaid with gold","It was made of acacia wood and overlaid with pure gold inside and out.","Exodus 25:10,11"],
+ ["¿De qué estaba hecha el arca del pacto?","De plata maciza","De bronce","De piedra","De madera de acacia recubierta de oro","Era de madera de acacia y estaba recubierta de oro puro por dentro y por fuera.","Éxodo 25:10, 11"]),
+B("art","medium",1,
+ ["Who made the golden calf while Moses was on the mountain?","Joshua","Aaron","Korah","Hur","Aaron shaped the gold with an engraving tool and made a molten calf.","Exodus 32:4"],
+ ["¿Quién hizo el becerro de oro mientras Moisés estaba en el monte?","Josué","Aarón","Coré","Hur","Aarón trabajó el oro con un buril e hizo un becerro de metal fundido.","Éxodo 32:4"]),
+B("art","medium",2,
+ ["What trade did the apostle Paul practise to support himself?","Carpenter","Potter","Tentmaker","Silversmith","Paul stayed with Aquila and Priscilla because they shared the same trade: tentmaking.","Acts 18:3"],
+ ["¿Qué oficio ejercía el apóstol Pablo para mantenerse?","Carpintero","Alfarero","Fabricante de tiendas","Platero","Pablo se quedó con Áquila y Priscila porque tenían el mismo oficio: hacer tiendas.","Hechos 18:3"]),
+B("art","medium",0,
+ ["What figures decorated the cover of the ark of the covenant?","Two cherubs of gold","Four lions","Twelve stars","A bronze serpent","Two cherubs of hammered gold stood at the two ends of the cover.","Exodus 25:18,19"],
+ ["¿Qué figuras adornaban la cubierta del arca del pacto?","Dos querubines de oro","Cuatro leones","Doce estrellas","Una serpiente de cobre","Dos querubines de oro labrado a martillo estaban en los dos extremos de la cubierta.","Éxodo 25:18, 19"]),
+B("art","hard",1,
+ ["Who does Genesis call the founder of all who play the harp and the pipe?","Tubal-cain","Jubal","Jabal","Lamech","Jubal was the founder of all those who play the harp and the pipe.","Genesis 4:21"],
+ ["¿A quién llama Génesis el fundador de todos los que tocan el arpa y la flauta?","Tubal-caín","Jubal","Jabal","Lamec","Jubal fue el fundador de todos los que tocan el arpa y la flauta.","Génesis 4:21"]),
+B("art","hard",2,
+ ["Which Bible book is a set of dirges over the fall of Jerusalem?","Nahum","Habakkuk","Lamentations","Obadiah","Lamentations opens by mourning the city that once was full of people.","Lamentations 1:1"],
+ ["¿Qué libro de la Biblia es un conjunto de cantos fúnebres por la caída de Jerusalén?","Nahúm","Habacuc","Lamentaciones","Abdías","Lamentaciones empieza lamentando la ciudad que antes estaba llena de gente.","Lamentaciones 1:1"]),
+B("art","hard",0,
+ ["What were the names of the two pillars at the entrance of Solomon's temple?","Jachin and Boaz","Gog and Magog","Urim and Thummim","Shadrach and Meshach","He set up the right pillar and called it Jachin, and the left one Boaz.","1 Kings 7:21"],
+ ["¿Cómo se llamaban las dos columnas de la entrada del templo de Salomón?","Jaquín y Boaz","Gog y Magog","Urim y Tumim","Sadrac y Mesac","Levantó la columna derecha y la llamó Jaquín, y la izquierda Boaz.","1 Reyes 7:21"]),
+B("art","hard",3,
+ ["How many precious stones were set in the high priest's breastpiece?","Four","Seven","Ten","Twelve","Four rows of three stones each, one for every tribe of Israel.","Exodus 28:17-21"],
+ ["¿Cuántas piedras preciosas tenía el pectoral del sumo sacerdote?","Cuatro","Siete","Diez","Doce","Cuatro hileras de tres piedras cada una, una por cada tribu de Israel.","Éxodo 28:17-21"]),
+B("art","hard",1,
+ ["Which judge sang a victory song together with Barak?","Jael","Deborah","Hannah","Miriam","On that day Deborah and Barak sang the song recorded in Judges chapter 5.","Judges 5:1"],
+ ["¿Qué jueza cantó un canto de victoria junto con Barac?","Jael","Débora","Ana","Míriam","Aquel día Débora y Barac cantaron el canto que aparece en Jueces capítulo 5.","Jueces 5:1"]),
+B("art","hard",2,
+ ["Which instruments did the Levite singers play when the ark was brought up?","Only trumpets","Only drums","Stringed instruments, harps and cymbals","Only the voice","The singers were appointed to play loudly on stringed instruments, harps and cymbals.","1 Chronicles 15:16"],
+ ["¿Qué instrumentos tocaban los cantores levitas cuando se subió el arca?","Solo trompetas","Solo tambores","Instrumentos de cuerda, arpas y címbalos","Solo la voz","Se nombró a los cantores para que tocaran con fuerza instrumentos de cuerda, arpas y címbalos.","1 Crónicas 15:16"]),
+// ---------- SPORTS · Asher, the Champion ----------
+B("sports","easy",2,
+ ["To what contest did Paul compare the Christian life?","A chariot race","A chess match","A race in the stadium","A hunt","Paul wrote that runners all run, but only one receives the prize.","1 Corinthians 9:24"],
+ ["¿Con qué competencia comparó Pablo la vida cristiana?","Una carrera de carros","Una partida de ajedrez","Una carrera en el estadio","Una cacería","Pablo escribió que todos los corredores corren, pero solo uno recibe el premio.","1 Corintios 9:24"]),
+B("sports","easy",1,
+ ["According to Paul, how should a Christian run the race?","Slowly","So as to win the prize","Without training","Only for a while","Paul urged: Run in such a way that you may obtain it.","1 Corinthians 9:24"],
+ ["Según Pablo, ¿cómo debe correr la carrera un cristiano?","Despacio","De modo que gane el premio","Sin entrenar","Solo un rato","Pablo animó: Corran de tal manera que lo obtengan.","1 Corintios 9:24"]),
+B("sports","easy",0,
+ ["What kind of crown did the athletes of Paul's day receive?","A perishable crown","A crown of gold","A crown of iron","No crown at all","They did it to get a corruptible crown; Christians, an incorruptible one.","1 Corinthians 9:25"],
+ ["¿Qué clase de corona recibían los atletas de los días de Pablo?","Una corona corruptible","Una corona de oro","Una corona de hierro","Ninguna corona","Ellos lo hacían por una corona corruptible; los cristianos, por una incorruptible.","1 Corintios 9:25"]),
+B("sports","easy",3,
+ ["Who ran ahead of Ahab's chariot all the way to Jezreel?","Jehu","Gehazi","Elisha","Elijah","Jehovah's power came upon Elijah and he ran ahead of Ahab to Jezreel.","1 Kings 18:46"],
+ ["¿Quién corrió delante del carro de Acab hasta Jezreel?","Jehú","Guehazí","Eliseo","Elías","El poder de Jehová vino sobre Elías y corrió delante de Acab hasta Jezreel.","1 Reyes 18:46"]),
+B("sports","easy",1,
+ ["Who wrestled with an angel until daybreak?","Esau","Jacob","Joshua","Samson","The man wrestled with Jacob until dawn and touched his hip joint.","Genesis 32:24,25"],
+ ["¿Quién luchó con un ángel hasta el amanecer?","Esaú","Jacob","Josué","Sansón","El hombre luchó con Jacob hasta el alba y le tocó la articulación de la cadera.","Génesis 32:24, 25"]),
+B("sports","easy",2,
+ ["In which letter did Paul write: I have run the race to the finish?","Romans","Galatians","2 Timothy","Titus","Near his death Paul said he had fought the fine fight and finished the race.","2 Timothy 4:7"],
+ ["¿En qué carta escribió Pablo: He corrido la carrera hasta el final?","Romanos","Gálatas","2 Timoteo","Tito","Cerca de su muerte Pablo dijo que había peleado la excelente batalla y acabado la carrera.","2 Timoteo 4:7"]),
+B("sports","easy",0,
+ ["What does Hebrews say runners of the Christian race should throw off?","Every weight and the sin that entangles","Their sandals","Their companions","Their hope","Hebrews urges us to throw off every weight and run with endurance.","Hebrews 12:1"],
+ ["¿Qué dice Hebreos que deben quitarse los corredores de la carrera cristiana?","Todo peso y el pecado que los enreda","Las sandalias","Sus compañeros","Su esperanza","Hebreos anima a quitarse todo peso y correr con aguante.","Hebreos 12:1"]),
+B("sports","medium",1,
+ ["According to Hebrews 12:1, what surrounds the Christian runner?","An empty stadium","A great cloud of witnesses","A wall of fire","An army of angels","The faithful men and women of chapter 11 are that great cloud of witnesses.","Hebrews 12:1"],
+ ["Según Hebreos 12:1, ¿qué rodea al corredor cristiano?","Un estadio vacío","Una gran nube de testigos","Un muro de fuego","Un ejército de ángeles","Los hombres y mujeres fieles del capítulo 11 son esa gran nube de testigos.","Hebreos 12:1"]),
+B("sports","medium",2,
+ ["Which of David's men was as swift of foot as a gazelle?","Joab","Abishai","Asahel","Benaiah","Asahel was swift of foot, like a gazelle in the field.","2 Samuel 2:18"],
+ ["¿Cuál de los hombres de David era tan veloz como una gacela?","Joab","Abisái","Asahel","Benaías","Asahel era veloz de pies, como una gacela del campo.","2 Samuel 2:18"]),
+B("sports","medium",0,
+ ["How did Paul say he directed his blows?","Not as one beating the air","Blindfolded","Without aiming","Only in training","Paul said he did not run aimlessly nor box as one beating the air.","1 Corinthians 9:26"],
+ ["¿Cómo dijo Pablo que dirigía sus golpes?","No como quien golpea el aire","Con los ojos vendados","Sin apuntar","Solo en el entrenamiento","Pablo dijo que no corría sin rumbo ni boxeaba como quien golpea el aire.","1 Corintios 9:26"]),
+B("sports","medium",3,
+ ["In the illustration of the lost son, what did the father do when he saw him far off?","He waited seated","He sent a servant","He closed the door","He ran to meet him","Moved with pity, the father ran, fell on his neck and kissed him.","Luke 15:20"],
+ ["En la ilustración del hijo perdido, ¿qué hizo el padre al verlo de lejos?","Esperó sentado","Envió a un sirviente","Cerró la puerta","Corrió a su encuentro","Lleno de compasión, el padre corrió, lo abrazó y lo besó.","Lucas 15:20"]),
+B("sports","medium",1,
+ ["According to Paul, when is an athlete crowned?","Whenever he wants","Only if he competes according to the rules","If he pays the judge","If he is the strongest","If anyone competes in the games, he is not crowned unless he does so according to the rules.","2 Timothy 2:5"],
+ ["Según Pablo, ¿cuándo es coronado un atleta?","Cuando él quiera","Solo si compite según las reglas","Si paga al juez","Si es el más fuerte","Si alguien compite en los juegos, no es coronado a menos que lo haga según las reglas.","2 Timoteo 2:5"]),
+B("sports","medium",2,
+ ["Which two disciples ran together to the memorial tomb?","James and John","Peter and Thomas","Peter and the other disciple","Philip and Andrew","Both were running, but the other disciple ran faster than Peter and arrived first.","John 20:3,4"],
+ ["¿Qué dos discípulos corrieron juntos a la tumba conmemorativa?","Santiago y Juan","Pedro y Tomás","Pedro y el otro discípulo","Felipe y Andrés","Los dos corrían, pero el otro discípulo corrió más rápido que Pedro y llegó primero.","Juan 20:3, 4"]),
+B("sports","medium",0,
+ ["What did Paul say about bodily training?","It is beneficial for a little","It is useless","It is forbidden","It is the most important thing","Bodily training is beneficial for a little, but godly devotion is beneficial for all things.","1 Timothy 4:8"],
+ ["¿Qué dijo Pablo sobre el entrenamiento físico?","Es provechoso para poco","No sirve de nada","Está prohibido","Es lo más importante","El entrenamiento físico es provechoso para poco, pero la devoción piadosa lo es para todo.","1 Timoteo 4:8"]),
+B("sports","hard",1,
+ ["Which judge tore a young lion apart with his bare hands?","Gideon","Samson","Jephthah","Othniel","Jehovah's spirit empowered Samson, and he tore the lion as one tears a young goat.","Judges 14:6"],
+ ["¿Qué juez despedazó un león joven con sus propias manos?","Gedeón","Sansón","Jefté","Otniel","El espíritu de Jehová actuó sobre Sansón y despedazó al león como quien despedaza un cabrito.","Jueces 14:6"]),
+B("sports","hard",2,
+ ["Who outran the Cushite to bring David news of the battle?","Joab","Absalom","Ahimaaz","Ittai","Ahimaaz ran by the route of the District and outran the Cushite.","2 Samuel 18:23"],
+ ["¿Quién corrió más rápido que el cusita para llevarle a David noticias de la batalla?","Joab","Absalón","Ahimáaz","Itai","Ahimáaz corrió por el camino del Distrito y adelantó al cusita.","2 Samuel 18:23"]),
+B("sports","hard",0,
+ ["What did Paul say he did with his body so as not to be disqualified?","He treated it harshly and led it as a slave","He let it rest","He adorned it","He ignored it","Paul pummelled his body and led it as a slave so he would not be disapproved.","1 Corinthians 9:27"],
+ ["¿Qué dijo Pablo que hacía con su cuerpo para no ser descalificado?","Lo trataba con severidad y lo llevaba como esclavo","Lo dejaba descansar","Lo adornaba","Lo ignoraba","Pablo golpeaba su cuerpo y lo llevaba como esclavo para no ser desaprobado.","1 Corintios 9:27"]),
+B("sports","hard",3,
+ ["Who climbed a fig-mulberry tree to see Jesus go by?","Nicodemus","Bartimaeus","Jairus","Zacchaeus","Zacchaeus was short, so he ran ahead and climbed a tree.","Luke 19:4"],
+ ["¿Quién se subió a un sicómoro para ver pasar a Jesús?","Nicodemo","Bartimeo","Jairo","Zaqueo","Zaqueo era de baja estatura, así que corrió adelante y se subió a un árbol.","Lucas 19:4"]),
+B("sports","hard",1,
+ ["What was Paul pursuing according to Philippians 3:14?","Riches","The goal, the prize of the upward call","Human fame","A rest","Paul pressed on toward the goal for the prize of God's upward call.","Philippians 3:14"],
+ ["¿Qué perseguía Pablo según Filipenses 3:14?","Riquezas","La meta, el premio del llamamiento de arriba","La fama humana","Un descanso","Pablo seguía adelante hacia la meta por el premio del llamamiento de Dios.","Filipenses 3:14"]),
+B("sports","hard",2,
+ ["What did the man healed at the temple gate do?","He kept sitting","He walked slowly","He leaped up and walked and leaped","He went home in silence","Leaping up he stood and began to walk, and entered the temple walking and leaping.","Acts 3:8"],
+ ["¿Qué hizo el hombre que fue curado a la puerta del templo?","Siguió sentado","Caminó despacio","Se puso de pie de un salto y empezó a caminar y a saltar","Se fue a casa en silencio","De un salto se puso de pie y empezó a caminar, y entró en el templo caminando y saltando.","Hechos 3:8"]),
+// ---------- ECONOMICS · Levi, the Merchant ----------
+B("economics","easy",2,
+ ["How many pieces of silver did Judas receive for betraying Jesus?","Three","Ten","Thirty","A hundred","The chief priests weighed out thirty silver pieces for Judas.","Matthew 26:15"],
+ ["¿Cuántas piezas de plata recibió Judas por traicionar a Jesús?","Tres","Diez","Treinta","Cien","Los sacerdotes principales le pesaron a Judas treinta piezas de plata.","Mateo 26:15"]),
+B("economics","easy",1,
+ ["What did the poor widow drop into the treasury chests?","A gold coin","Two small coins of very little value","A silver talent","Nothing","Jesus said she had put in more than all the others, for she gave all she had.","Mark 12:42-44"],
+ ["¿Qué echó la viuda pobre en las arcas del tesoro?","Una moneda de oro","Dos monedas pequeñas de muy poco valor","Un talento de plata","Nada","Jesús dijo que ella había echado más que todos, porque dio todo lo que tenía.","Marcos 12:42-44"]),
+B("economics","easy",0,
+ ["According to Paul, what is the love of money?","A root of all sorts of harmful things","A sign of wisdom","A blessing","A duty","Paul warned that by reaching out for this love some have stabbed themselves with many pains.","1 Timothy 6:10"],
+ ["Según Pablo, ¿qué es el amor al dinero?","Una raíz de toda clase de cosas perjudiciales","Señal de sabiduría","Una bendición","Un deber","Pablo advirtió que algunos, por buscar ese amor, se han causado muchos dolores.","1 Timoteo 6:10"]),
+B("economics","easy",3,
+ ["What work was Matthew doing when Jesus called him?","He was fishing","He was farming","He was building","He was collecting taxes","Jesus saw Matthew sitting at the tax office and said: Be my follower.","Matthew 9:9"],
+ ["¿Qué trabajo hacía Mateo cuando Jesús lo llamó?","Pescaba","Cultivaba","Construía","Cobraba impuestos","Jesús vio a Mateo sentado en la oficina de impuestos y le dijo: Sé mi seguidor.","Mateo 9:9"]),
+B("economics","easy",1,
+ ["According to Jesus, whom can a person not serve together with God?","Caesar","Riches","His family","The king","No one can slave for two masters: you cannot slave for God and for Riches.","Matthew 6:24"],
+ ["Según Jesús, ¿a quién no se puede servir junto con Dios?","Al César","A las Riquezas","A la familia","Al rey","Nadie puede servir a dos amos: no se puede servir a Dios y a las Riquezas.","Mateo 6:24"]),
+B("economics","easy",2,
+ ["What did Esau sell his birthright for?","A field","A flock","Bread and lentil stew","A house","Esau ate and drank, and so he despised his birthright.","Genesis 25:34"],
+ ["¿Por qué vendió Esaú su primogenitura?","Por un campo","Por un rebaño","Por pan y guiso de lentejas","Por una casa","Esaú comió y bebió, y así despreció su primogenitura.","Génesis 25:34"]),
+B("economics","easy",0,
+ ["In whose fields did Ruth glean during the harvest?","Boaz","Elimelech","Mahlon","Obed","Ruth gleaned until the end of the barley and wheat harvests.","Ruth 2:23"],
+ ["¿En los campos de quién espigó Rut durante la cosecha?","Boaz","Elimélec","Mahlón","Obed","Rut espigó hasta el final de la cosecha de cebada y de trigo.","Rut 2:23"]),
+B("economics","medium",2,
+ ["In the illustration of the talents, how many did the master give the first slave?","One","Two","Five","Ten","He gave five talents to one, two to another and one to another, each according to his ability.","Matthew 25:15"],
+ ["En la ilustración de los talentos, ¿cuántos entregó el amo al primer esclavo?","Uno","Dos","Cinco","Diez","Dio cinco talentos a uno, dos a otro y uno a otro, a cada cual según su capacidad.","Mateo 25:15"]),
+B("economics","medium",1,
+ ["What did a denarius represent in Jesus' day?","A month's wage","A day's wage","A year's wage","A tax","The master agreed with the workers on a denarius for the day.","Matthew 20:2"],
+ ["¿Qué representaba un denario en los días de Jesús?","El salario de un mes","El salario de un día","El salario de un año","Un impuesto","El amo acordó con los trabajadores un denario por el día.","Mateo 20:2"]),
+B("economics","medium",0,
+ ["What did Jesus do with the money changers' tables in the temple?","He overturned them","He bought them","He blessed them","He ignored them","Jesus overturned the tables of the money changers and the benches of those selling doves.","Matthew 21:12"],
+ ["¿Qué hizo Jesús con las mesas de los cambistas en el templo?","Las volcó","Las compró","Las bendijo","Las ignoró","Jesús volcó las mesas de los cambistas y los bancos de los que vendían palomas.","Mateo 21:12"]),
+B("economics","medium",3,
+ ["What did the Law command about the edges of the fields at harvest time?","To burn them","To sell them","To plough them again","To leave them for the poor and the foreigner","The gleanings were to be left for the afflicted one and the foreign resident.","Leviticus 19:9,10"],
+ ["¿Qué mandaba la Ley sobre los bordes de los campos en la cosecha?","Quemarlos","Venderlos","Ararlos otra vez","Dejarlos para el pobre y el extranjero","El rebusco debía dejarse para el afligido y el residente extranjero.","Levítico 19:9, 10"]),
+B("economics","medium",1,
+ ["What portion of Israel's produce was given to the Levites?","A fifth","A tenth","A half","A third","Jehovah gave the Levites every tenth part in Israel as their inheritance.","Numbers 18:21"],
+ ["¿Qué parte de los productos de Israel se daba a los levitas?","Una quinta parte","La décima parte","La mitad","Una tercera parte","Jehová dio a los levitas toda décima parte en Israel como su herencia.","Números 18:21"]),
+B("economics","medium",2,
+ ["What was Lydia's business in Philippi?","She sold fish","She made pottery","She sold purple","She wove linen","Lydia was a seller of purple from the city of Thyatira and a worshipper of God.","Acts 16:14"],
+ ["¿Cuál era el negocio de Lidia en Filipos?","Vendía pescado","Hacía cerámica","Vendía púrpura","Tejía lino","Lidia era vendedora de púrpura de la ciudad de Tiatira y adoraba a Dios.","Hechos 16:14"]),
+B("economics","medium",0,
+ ["What happened in Israel every fiftieth year?","The Jubilee: liberty was proclaimed and the land returned","Taxes were doubled","The temple was rebuilt","A census was taken","In the Jubilee each one returned to his possession and to his family.","Leviticus 25:10"],
+ ["¿Qué ocurría en Israel cada cincuenta años?","El Jubileo: se proclamaba libertad y la tierra volvía a su dueño","Se duplicaban los impuestos","Se reconstruía el templo","Se hacía un censo","En el Jubileo cada uno volvía a su propiedad y a su familia.","Levítico 25:10"]),
+B("economics","hard",1,
+ ["What happened to debts every seventh year?","They doubled","They were released","They were forgotten","They passed to the king","At the end of every seven years a release of debts was to be made.","Deuteronomy 15:1,2"],
+ ["¿Qué pasaba con las deudas cada siete años?","Se duplicaban","Se cancelaban","Se olvidaban","Pasaban al rey","Al final de cada siete años se debía hacer una cancelación de deudas.","Deuteronomio 15:1, 2"]),
+B("economics","hard",2,
+ ["What did Joseph store during the seven years of plenty?","Gold","Cattle","Grain","Cloth","Joseph kept piling up grain like the sand of the sea, until he stopped counting it.","Genesis 41:48,49"],
+ ["¿Qué almacenó José durante los siete años de abundancia?","Oro","Ganado","Grano","Telas","José siguió amontonando grano como la arena del mar, hasta que dejó de contarlo.","Génesis 41:48, 49"]),
+B("economics","hard",0,
+ ["How much did Abraham pay for the field of Machpelah?","Four hundred silver shekels","Thirty gold shekels","A hundred sheep","Nothing, it was a gift","Abraham weighed out to Ephron the four hundred silver shekels agreed on.","Genesis 23:16"],
+ ["¿Cuánto pagó Abrahán por el campo de Macpelá?","Cuatrocientos siclos de plata","Treinta siclos de oro","Cien ovejas","Nada, fue un regalo","Abrahán le pesó a Efrón los cuatrocientos siclos de plata convenidos.","Génesis 23:16"]),
+B("economics","hard",3,
+ ["What did Jesus teach about lending?","To lend only to the rich","To charge high interest","Never to lend","To lend without expecting anything back","Keep on lending without interest, not hoping for anything back.","Luke 6:35"],
+ ["¿Qué enseñó Jesús sobre prestar?","Prestar solo a los ricos","Cobrar intereses altos","No prestar nunca","Prestar sin esperar nada a cambio","Presten sin esperar que se les devuelva nada.","Lucas 6:35"]),
+B("economics","hard",1,
+ ["What did the Law say about charging interest to a poor Israelite brother?","It was allowed","It was forbidden","It was obligatory","Only in the city","You must not take interest or usury from him; you must fear your God.","Leviticus 25:36,37"],
+ ["¿Qué decía la Ley sobre cobrar intereses a un hermano israelita pobre?","Estaba permitido","Estaba prohibido","Era obligatorio","Solo en la ciudad","No le cobres intereses ni saques beneficio de él; tienes que temer a tu Dios.","Levítico 25:36, 37"]),
+B("economics","hard",2,
+ ["In the illustration of the workers in the vineyard, what did each one receive?","Nothing","A talent","A denarius","Half a denarius","Those hired last and those hired first each received a denarius.","Matthew 20:9,10"],
+ ["En la ilustración de los obreros de la viña, ¿qué recibió cada uno?","Nada","Un talento","Un denario","Medio denario","Tanto los contratados al final como los primeros recibieron un denario cada uno.","Mateo 20:9, 10"]),
+// ---------- RIDDLES · Eli, the Wise One ----------
+B("riddles","easy",1,
+ ["Who posed the riddle: Out of the eater came something to eat?","David","Samson","Solomon","Gideon","Samson put this riddle to the thirty companions at his feast.","Judges 14:14"],
+ ["¿Quién planteó la adivinanza: Del que come salió comida?","David","Sansón","Salomón","Gedeón","Sansón planteó esta adivinanza a los treinta compañeros de su banquete.","Jueces 14:14"]),
+B("riddles","easy",2,
+ ["Which queen came to test Solomon with perplexing questions?","Esther","Jezebel","The queen of Sheba","Athaliah","She came to test him with difficult questions, and he answered them all.","1 Kings 10:1-3"],
+ ["¿Qué reina vino a poner a prueba a Salomón con preguntas difíciles?","Ester","Jezabel","La reina de Seba","Atalía","Vino a probarlo con preguntas difíciles, y él las contestó todas.","1 Reyes 10:1-3"]),
+B("riddles","easy",0,
+ ["In the illustration of the lost sheep, how many did the shepherd leave behind?","Ninety-nine","Nine","Fifty","Twelve","He leaves the ninety-nine in the wilderness and goes after the lost one.","Luke 15:4"],
+ ["En la ilustración de la oveja perdida, ¿cuántas dejó el pastor?","Noventa y nueve","Nueve","Cincuenta","Doce","Deja las noventa y nueve en el desierto y va tras la perdida.","Lucas 15:4"]),
+B("riddles","easy",3,
+ ["In the illustration of the sower, on which soil did the seed bear fruit?","On the path","On rocky ground","Among thorns","On the fine soil","The seed on the fine soil produced fruit, one a hundredfold.","Matthew 13:8"],
+ ["En la ilustración del sembrador, ¿en qué terreno dio fruto la semilla?","En el camino","En terreno rocoso","Entre espinos","En la tierra buena","La semilla en la tierra buena produjo fruto, una el ciento por uno.","Mateo 13:8"]),
+B("riddles","easy",1,
+ ["How many of the ten virgins in the illustration were foolish?","Three","Five","Seven","Ten","Five of them were foolish and five were discreet.","Matthew 25:2"],
+ ["¿Cuántas de las diez vírgenes de la ilustración eran necias?","Tres","Cinco","Siete","Diez","Cinco de ellas eran necias y cinco eran prudentes.","Mateo 25:2"]),
+B("riddles","easy",2,
+ ["To which tiny seed did Jesus compare the Kingdom?","A wheat grain","A lentil","A mustard grain","An olive","It is the tiniest of all the seeds, but when grown it becomes a tree.","Matthew 13:31,32"],
+ ["¿Con qué semilla diminuta comparó Jesús el Reino?","Un grano de trigo","Una lenteja","Un grano de mostaza","Una aceituna","Es la más pequeña de todas las semillas, pero al crecer llega a ser un árbol.","Mateo 13:31, 32"]),
+B("riddles","easy",0,
+ ["How did Solomon discover which woman was the real mother?","He ordered the child divided in two","He asked the neighbours","He drew lots","He asked the child","The real mother gave up the child rather than let him be killed.","1 Kings 3:25-27"],
+ ["¿Cómo descubrió Salomón cuál mujer era la verdadera madre?","Mandó dividir al niño en dos","Preguntó a los vecinos","Echó suertes","Le preguntó al niño","La verdadera madre renunció al niño antes que dejar que lo mataran.","1 Reyes 3:25-27"]),
+B("riddles","medium",1,
+ ["What was the answer the companions gave to Samson's riddle?","The lion and the vine","What is sweeter than honey and what is stronger than a lion?","The sun and the moon","Bread and wine","They answered just before sunset on the seventh day.","Judges 14:18"],
+ ["¿Cuál fue la respuesta que dieron los compañeros a la adivinanza de Sansón?","El león y la vid","¿Qué es más dulce que la miel y qué es más fuerte que un león?","El sol y la luna","El pan y el vino","Respondieron justo antes de ponerse el sol del séptimo día.","Jueces 14:18"]),
+B("riddles","medium",2,
+ ["What did the word TEKEL mean on Belshazzar's wall?","You will reign a long time","Your kingdom will grow","You have been weighed in the balances and found lacking","Babylon will be rebuilt","Daniel explained the writing that very night, and Babylon fell.","Daniel 5:27"],
+ ["¿Qué significaba la palabra TEKEL en la pared de Belsasar?","Reinarás mucho tiempo","Tu reino crecerá","Has sido pesado en la balanza y hallado falto","Babilonia será reconstruida","Daniel explicó la escritura esa misma noche, y Babilonia cayó.","Daniel 5:27"]),
+B("riddles","medium",0,
+ ["Which illustration did Jesus use to answer: Who is my neighbour?","The neighbourly Samaritan","The rich man and Lazarus","The ten virgins","The wheat and the weeds","A Samaritan helped a stranger whom others had passed by.","Luke 10:29-37"],
+ ["¿Qué ilustración usó Jesús para responder: Quién es mi prójimo?","El samaritano que se portó como prójimo","El rico y Lázaro","Las diez vírgenes","El trigo y la mala hierba","Un samaritano ayudó a un desconocido al que otros habían pasado de largo.","Lucas 10:29-37"]),
+B("riddles","medium",3,
+ ["What did the slave who received one talent do with it?","He invested it","He gave it away","He lost it","He dug a hole and hid it","He hid his master's silver money in the ground.","Matthew 25:18"],
+ ["¿Qué hizo con su talento el esclavo que recibió uno?","Lo invirtió","Lo regaló","Lo perdió","Cavó un hoyo y lo escondió","Escondió en la tierra el dinero de plata de su amo.","Mateo 25:18"]),
+B("riddles","medium",1,
+ ["According to Jesus, what is easier than for a rich man to enter the Kingdom?","For a mountain to move","For a camel to go through a needle's eye","For the sea to dry up","For the sun to stop","The disciples were astounded and asked: Who can be saved?","Matthew 19:24"],
+ ["Según Jesús, ¿qué es más fácil que el que un rico entre en el Reino?","Que se mueva una montaña","Que un camello pase por el ojo de una aguja","Que se seque el mar","Que se detenga el sol","Los discípulos se asombraron y preguntaron: ¿Quién puede salvarse?","Mateo 19:24"]),
+B("riddles","medium",2,
+ ["Which trick question did Jesus answer: Pay back Caesar's things to Caesar?","About the resurrection","About the sabbath","About paying the tax","About divorce","They tried to catch him in his speech about the head tax.","Mark 12:14-17"],
+ ["¿Qué pregunta capciosa respondió Jesús con: Paguen a César lo de César?","Sobre la resurrección","Sobre el sábado","Sobre pagar el impuesto","Sobre el divorcio","Trataban de atraparlo en sus palabras acerca del impuesto.","Marcos 12:14-17"]),
+B("riddles","medium",0,
+ ["What did the prophet Nathan use to make David see his sin?","An illustration about a poor man's lamb","A written law","A vision","A song","When David condemned the rich man, Nathan told him: You are the man!","2 Samuel 12:1-7"],
+ ["¿Qué usó el profeta Natán para que David viera su pecado?","Una ilustración sobre la corderita de un pobre","Una ley escrita","Una visión","Una canción","Cuando David condenó al rico, Natán le dijo: ¡Tú eres ese hombre!","2 Samuel 12:1-7"]),
+B("riddles","hard",2,
+ ["In Proverbs 30, how many things does Agur say he does not understand?","Two","Three","Four","Seven","There are three things that are too extraordinary for me, four that I do not understand.","Proverbs 30:18,19"],
+ ["En Proverbios 30, ¿cuántas cosas dice Agur que no entiende?","Dos","Tres","Cuatro","Siete","Hay tres cosas que escapan a mi comprensión, cuatro que no entiendo.","Proverbios 30:18, 19"]),
+B("riddles","hard",1,
+ ["Which small creature does Proverbs tell the lazy person to learn from?","The bee","The ant","The spider","The locust","Go to the ant, you lazy one; see its ways and become wise.","Proverbs 6:6"],
+ ["¿De qué pequeña criatura dice Proverbios que aprenda el perezoso?","La abeja","La hormiga","La araña","La langosta","Ve a la hormiga, perezoso; mira sus caminos y hazte sabio.","Proverbios 6:6"]),
+B("riddles","hard",3,
+ ["What did Jesus write on the ground before the accusers of the woman?","A list of sins","The Ten Commandments","Their names","The Bible does not say","The account records the action but not what he wrote.","John 8:6"],
+ ["¿Qué escribió Jesús en el suelo ante los acusadores de la mujer?","Una lista de pecados","Los Diez Mandamientos","Sus nombres","La Biblia no lo dice","El relato menciona la acción, pero no lo que escribió.","Juan 8:6"]),
+B("riddles","hard",0,
+ ["With which creature does the riddle of Ezekiel chapter 17 begin?","A great eagle","A lion","A bear","A serpent","Jehovah told Ezekiel to pose a riddle about a great eagle and a cedar.","Ezekiel 17:2,3"],
+ ["¿Con qué criatura empieza la adivinanza de Ezequiel capítulo 17?","Un águila grande","Un león","Un oso","Una serpiente","Jehová mandó a Ezequiel plantear una adivinanza sobre un águila grande y un cedro.","Ezequiel 17:2, 3"]),
+B("riddles","hard",1,
+ ["How did the master describe the slave who hid the talent?","Faithful and discreet","Wicked and sluggish","Young and inexperienced","Poor and tired","The master answered him: Wicked and sluggish slave.","Matthew 25:26"],
+ ["¿Cómo describió el amo al esclavo que escondió el talento?","Fiel y discreto","Malo y perezoso","Joven e inexperto","Pobre y cansado","El amo le contestó: Esclavo malo y perezoso.","Mateo 25:26"]),
+B("riddles","hard",2,
+ ["How many baskets of leftovers were gathered after feeding the 5,000 men?","Five","Seven","Twelve","Twenty","They took up twelve baskets full of the leftover fragments.","Matthew 14:20"],
+ ["¿Cuántas cestas de sobras se recogieron después de alimentar a 5.000 hombres?","Cinco","Siete","Doce","Veinte","Recogieron doce cestas llenas de los pedazos que sobraron.","Mateo 14:20"]),
+// ---------- PENDING REVIEW ----------
+// These seven touch doctrinal or chronological points rather than a plain reading of a verse.
+// They ship switched off (verified:false): the host should check each one against jw.org or the
+// Watchtower ONLINE LIBRARY and tick it as verified in the question bank before using it.
+R("prophecy","medium",2,
+ ["According to the teaching of Jehovah's Witnesses, which year marks the establishment of God's Kingdom in heaven?","1874","1878","1914","1975","Check this answer against the current publications before using the question.","Daniel 4:16,17"],
+ ["Según las enseñanzas de los testigos de Jehová, ¿qué año marca el establecimiento del Reino de Dios en el cielo?","1874","1878","1914","1975","Verifique esta respuesta en las publicaciones actuales antes de usar la pregunta.","Daniel 4:16, 17"]),
+R("history","hard",1,
+ ["According to the chronology used by Jehovah's Witnesses, in which year was Jerusalem destroyed by Babylon?","586 B.C.E.","607 B.C.E.","539 B.C.E.","70 C.E.","Check this date against the current publications before using the question.","Jeremiah 25:11"],
+ ["Según la cronología que usan los testigos de Jehová, ¿en qué año destruyó Babilonia a Jerusalén?","586 a. e. c.","607 a. e. c.","539 a. e. c.","70 e. c.","Verifique esta fecha en las publicaciones actuales antes de usar la pregunta.","Jeremías 25:11"]),
+R("geography","easy",1,
+ ["Where does the Bible say that most faithful people will live forever?","Only in heaven","On the earth","On another planet","Nowhere","The righteous will possess the earth and live forever on it.","Psalm 37:29"],
+ ["¿Dónde dice la Biblia que vivirá para siempre la mayoría de las personas fieles?","Solo en el cielo","En la Tierra","En otro planeta","En ningún lugar","Los justos poseerán la tierra y vivirán para siempre en ella.","Salmo 37:29"]),
+R("art","medium",2,
+ ["Why do Jehovah's Witnesses not use the cross as a religious symbol?","Because it is too old","Because it is hard to draw","Because they understand that Jesus died on a stake and that images are not used in worship","Because it is expensive","Check the explanation in the publications before using the question.","Acts 5:30"],
+ ["¿Por qué los testigos de Jehová no usan la cruz como símbolo religioso?","Porque es muy antigua","Porque es difícil de dibujar","Porque entienden que Jesús murió en un madero y que no se usan imágenes en la adoración","Porque es cara","Verifique la explicación en las publicaciones antes de usar la pregunta.","Hechos 5:30"]),
+R("sports","medium",0,
+ ["Which Bible principle guides a Christian's view of competitive sport?","Not to stir up competition with one another","To win at any cost","To avoid all exercise","To compete only on the sabbath","Paul urged Christians not to become egotistical, stirring up competition with one another.","Galatians 5:26"],
+ ["¿Qué principio bíblico guía la actitud cristiana hacia el deporte competitivo?","No fomentar la competencia unos con otros","Ganar a cualquier precio","Evitar todo ejercicio","Competir solo en sábado","Pablo animó a los cristianos a no hacerse egotistas, fomentando la competencia unos con otros.","Gálatas 5:26"]),
+R("economics","easy",1,
+ ["How is the work of Jehovah's Witnesses financed?","With obligatory tithes","With voluntary donations","With collections during the meetings","With a membership fee","Each one does as he has resolved in his heart, for God loves a cheerful giver.","2 Corinthians 9:7"],
+ ["¿Cómo se financia la obra de los testigos de Jehová?","Con diezmos obligatorios","Con donaciones voluntarias","Con colectas durante las reuniones","Con una cuota de socio","Cada uno hace como ha resuelto en su corazón, porque Dios ama al que da con alegría.","2 Corintios 9:7"]),
+R("riddles","medium",0,
+ ["According to the Bible, what is a human soul?","The person himself","An invisible part that survives death","A guardian angel","A kind of energy","Genesis says that the man came to be a living soul, that is, a living person.","Genesis 2:7"],
+ ["Según la Biblia, ¿qué es el alma humana?","La persona misma","Una parte invisible que sobrevive a la muerte","Un ángel guardián","Una clase de energía","Génesis dice que el hombre llegó a ser un alma viviente, es decir, una persona viviente.","Génesis 2:7"]),
+];
+SEED.forEach(function(q,i){ q.id="BIB-"+String(i+1).padStart(3,"0"); });
+
+/* ============================ utilities ============================ */
+function lsGet(k,d){ try{var v=localStorage.getItem(k); return v?JSON.parse(v):d;}catch(e){return d;} }
+function lsSet(k,v){ try{localStorage.setItem(k,JSON.stringify(v));}catch(e){} }
+function lsDel(k){ try{localStorage.removeItem(k);}catch(e){} }
+function uid(p){ return (p||"BIB-x")+Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
+function shuffle(a){ var r=a.slice(); for(var i=r.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=r[i];r[i]=r[j];r[j]=t;} return r; }
+function clone(o){ return JSON.parse(JSON.stringify(o)); }
+function clamp(n,a,b){ return Math.max(a,Math.min(b,n)); }
+function catOf(id){ return CAT_BY_ID[id]||CATS[0]; }
+function catVars(id){ return {"--cc":"var(--c-"+id+")"}; }
+/* the side of a bilingual row for the active language, falling back to the other one */
+function side(q,lang){
+  var l=lang||LANG;
+  var s=q[l];
+  if(s&&s.q) return s;
+  return q.en&&q.en.q?q.en:(q.es||{q:"",o:["","","",""],e:"",ref:""});
+}
+
+/* ============================ audio ============================ */
+/* Music comes from real files dropped into audio/ — see the README. Anything missing just
+   stays silent. The short cues are synthesised so the game never waits on a download. */
+var MUSIC_FILES={ menu:"audio/menu.mp3", board:"audio/board.mp3", quiz:"audio/question.mp3", victory:"audio/victory.mp3" };
+var MUSIC_FALLBACK={ board:"menu", quiz:"board", victory:"menu" };
+var A={ ctx:null, master:null, sfxOn:true, musicOn:true, vol:0.75, noise:null,
+        players:{}, track:null, want:null, unlocked:false, preloaded:false };
+function audioInit(){
+  if(A.ctx!==null) return A.ctx;
+  try{ A.ctx=new (window.AudioContext||window.webkitAudioContext)(); }catch(e){ A.ctx=false; return null; }
+  A.master=A.ctx.createGain(); A.master.gain.value=A.vol; A.master.connect(A.ctx.destination);
+  var len=A.ctx.sampleRate*0.5, buf=A.ctx.createBuffer(1,len,A.ctx.sampleRate), d=buf.getChannelData(0);
+  for(var i=0;i<len;i++) d[i]=Math.random()*2-1;
+  A.noise=buf;
+  return A.ctx;
+}
+function player(name){
+  if(A.players[name]!==undefined) return A.players[name];
+  var src=MUSIC_FILES[name]; if(!src){ A.players[name]=null; return null; }
+  var el=new Audio(src);
+  el.loop=(name!=="victory"); el.preload="auto"; el.volume=0;
+  el.addEventListener("error",function(){
+    A.players[name]=null;                       /* file is not there: fall back and keep playing */
+    if(A.track===name){ A.track=null; if(A.want) musicStart(A.want); }
+  });
+  A.players[name]=el;
+  return el;
+}
+function fade(el,to,ms){
+  if(!el) return;
+  var from=el.volume, t0=performance.now();
+  (function step(){
+    var p=Math.min(1,(performance.now()-t0)/ms);
+    try{ el.volume=clamp(from+(to-from)*p,0,1); }catch(e){}
+    if(p<1) requestAnimationFrame(step);
+    else if(to===0){ try{ el.pause(); }catch(e){} }
+  })();
+}
+function musicStart(name){
+  A.want=name;
+  if(!A.unlocked||!A.musicOn){ if(A.musicOn) preloadTrack(name); return; }
+  var key=name;
+  if(!player(key)) key=MUSIC_FALLBACK[name]||null;
+  if(key&&!player(key)) key=null;
+  if(A.track===key) return;
+  if(A.track&&A.players[A.track]) fade(A.players[A.track],0,300);
+  A.track=key;
+  if(!key) return;
+  var el=player(key);
+  try{ if(!el.loop) el.currentTime=0; var p=el.play(); if(p&&p.catch) p.catch(function(){}); }catch(e){}
+  fade(el,A.vol*0.55,260);
+}
+function musicStop(){
+  if(A.track&&A.players[A.track]) fade(A.players[A.track],0,400);
+  A.track=null; A.want=null;
+}
+function preloadTrack(name){
+  var el=player(name);
+  if(!el) return;
+  if(el.readyState===0&&el.networkState!==2){ try{ el.load(); }catch(e){} }
+}
+function preloadAll(){
+  if(A.preloaded) return;
+  A.preloaded=true;
+  if(A.want) preloadTrack(A.want);
+  setTimeout(function(){
+    Object.keys(MUSIC_FILES).forEach(function(n){ if(n!==A.want) preloadTrack(n); });
+  },1500);
+}
+function audioResume(){
+  audioInit();
+  if(A.ctx&&A.ctx.state==="suspended"){ try{ A.ctx.resume(); }catch(e){} }
+  if(!A.unlocked){
+    A.unlocked=true;
+    if(A.want) musicStart(A.want);
+    preloadAll();
+  }
+}
+function applyAudio(st){
+  A.sfxOn=st.sfx; A.musicOn=st.music; A.vol=st.vol;
+  if(A.master&&A.ctx) A.master.gain.setTargetAtTime(A.vol,A.ctx.currentTime,0.05);
+  if(!A.musicOn){ if(A.track&&A.players[A.track]) fade(A.players[A.track],0,300); A.track=null; }
+  else if(A.want) musicStart(A.want);
+  else if(A.track&&A.players[A.track]) fade(A.players[A.track],A.vol*0.55,300);
+}
+function voice(type,f1,f2,t0,dur,peak,cutoff){
+  var c=A.ctx; if(!c) return;
+  var o=c.createOscillator(), g=c.createGain(), node=o;
+  o.type=type; o.frequency.setValueAtTime(f1,t0);
+  if(f2&&f2!==f1) o.frequency.exponentialRampToValueAtTime(f2,t0+dur);
+  if(cutoff){ var f=c.createBiquadFilter(); f.type="lowpass"; f.frequency.setValueAtTime(cutoff,t0); o.connect(f); node=f; }
+  g.gain.setValueAtTime(0.0001,t0);
+  g.gain.exponentialRampToValueAtTime(Math.max(0.0002,peak),t0+0.012);
+  g.gain.exponentialRampToValueAtTime(0.0001,t0+dur);
+  node.connect(g); g.connect(A.master);
+  o.start(t0); o.stop(t0+dur+0.04);
+}
+function hiss(t0,dur,peak,hp){
+  var c=A.ctx; if(!c||!A.noise) return;
+  var s=c.createBufferSource(); s.buffer=A.noise;
+  var f=c.createBiquadFilter(); f.type="highpass"; f.frequency.value=hp||5000;
+  var g=c.createGain();
+  g.gain.setValueAtTime(peak,t0); g.gain.exponentialRampToValueAtTime(0.0001,t0+dur);
+  s.connect(f); f.connect(g); g.connect(A.master);
+  s.start(t0); s.stop(t0+dur+0.02);
+}
+function sfx(name){
+  if(!A.sfxOn) return; var c=audioInit(); if(!c) return;
+  var t=c.currentTime;
+  if(name==="click")      voice("sine",680,920,t,0.07,0.06,4000);
+  else if(name==="tick")  voice("sine",1500,1500,t,0.04,0.05);
+  else if(name==="land"){ voice("sine",700,1050,t,0.14,0.12,6000); hiss(t,0.09,0.05,4000); }
+  else if(name==="good"){ [784,988,1319].forEach(function(f,i){ voice("sine",f,f,t+i*0.065,0.26,0.1,6000); }); }
+  else if(name==="bad"){  voice("sine",330,180,t,0.3,0.09,1400); }
+  else if(name==="riser"){ for(var i=0;i<18;i++) hiss(t+i*0.26,0.22,0.018+i*0.001,1200+i*260); }
+  else if(name==="unlock"){ [659,880,1175,1568].forEach(function(f,i){ voice("sine",f,f,t+i*0.085,0.4,0.1,8000); }); }
+  /* the crown gets a longer, brighter fanfare than anything else in the game */
+  else if(name==="crown"){ [1047,1319,1568,2093,2637].forEach(function(f,i){ voice("sine",f,f,t+i*0.075,0.5,0.1,10000); });
+                           hiss(t,0.5,0.05,6000); }
+  else if(name==="win"){ [523,659,784,1047,1319].forEach(function(f,i){ voice("sine",f,f,t+i*0.14,0.5,0.1,8000); }); }
+}
+
+/* ---- confetti ---- */
+var confettiStop=0, confettiRunning=false;
+function calmMode(){
+  return (window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches)
+      || document.documentElement.classList.contains("calm");
+}
+function confetti(ms){
+  var cv=document.getElementById("confetti"); if(!cv) return;
+  if(calmMode()) return;
+  cv.hidden=false;
+  var ctx=cv.getContext("2d"), parts=[];
+  function size(){ cv.width=window.innerWidth; cv.height=window.innerHeight; }
+  size();
+  var cols=["#ffc83d","#08c9cf","#19c97d","#ff4eb8","#7428e8","#ff624f","#fff5df"];
+  for(var i=0;i<180;i++) parts.push({
+    x:Math.random()*cv.width, y:-20-Math.random()*cv.height*0.6,
+    w:5+Math.random()*8, h:7+Math.random()*10,
+    vy:2.4+Math.random()*3.6, vx:-1.6+Math.random()*3.2,
+    r:Math.random()*Math.PI, vr:-0.16+Math.random()*0.32,
+    c:cols[(Math.random()*cols.length)|0]
+  });
+  confettiStop=Date.now()+(ms||4200);
+  if(confettiRunning) return;
+  confettiRunning=true;
+  (function frame(){
+    ctx.clearRect(0,0,cv.width,cv.height);
+    for(var i=0;i<parts.length;i++){
+      var p=parts[i]; p.x+=p.vx; p.y+=p.vy; p.r+=p.vr;
+      if(p.y>cv.height+30){ p.y=-20; p.x=Math.random()*cv.width; }
+      ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.r);
+      ctx.fillStyle=p.c; ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h); ctx.restore();
+    }
+    if(Date.now()<confettiStop) requestAnimationFrame(frame);
+    else { ctx.clearRect(0,0,cv.width,cv.height); cv.hidden=true; confettiRunning=false; }
+  })();
+  window.addEventListener("resize",size);
+}
+
+/* ---- starfield ---- */
+function Stars(){
+  var ref=useRef(null);
+  useEffect(function(){
+    var cv=ref.current; if(!cv) return;
+    var ctx=cv.getContext("2d"), stars=[], raf=0, reduce=calmMode();
+    function build(){
+      cv.width=window.innerWidth; cv.height=window.innerHeight; stars=[];
+      var n=Math.min(180,Math.round(cv.width*cv.height/12000));
+      for(var i=0;i<n;i++) stars.push({x:Math.random()*cv.width,y:Math.random()*cv.height,
+        r:Math.random()*1.6+0.3,p:Math.random()*6.28,s:0.01+Math.random()*0.026});
+    }
+    build();
+    function frame(){
+      ctx.clearRect(0,0,cv.width,cv.height);
+      for(var i=0;i<stars.length;i++){
+        var s=stars[i]; s.p+=s.s;
+        ctx.globalAlpha=0.25+Math.abs(Math.sin(s.p))*0.65;
+        ctx.fillStyle=i%7===0?"#ffd97a":"#ffffff";
+        ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,6.283); ctx.fill();
+      }
+      ctx.globalAlpha=1;
+      if(!reduce) raf=requestAnimationFrame(frame);
+    }
+    frame();
+    window.addEventListener("resize",build);
+    return function(){ cancelAnimationFrame(raf); window.removeEventListener("resize",build); };
+  },[]);
+  return html`<canvas id="stars" ref=${ref} aria-hidden="true"></canvas>`;
+}
+
+/* ============================ bank helpers ============================ */
+function defaultBank(){ return clone(SEED); }
+function okRow(q){
+  if(!q||!CAT_BY_ID[q.cat]||q.cat==="crown") return false;
+  var s=side(q,"en"), s2=side(q,"es");
+  return !!((s&&s.q&&s.o&&s.o.length===4)||(s2&&s2.q&&s2.o&&s2.o.length===4));
+}
+function loadBank(){
+  var b=lsGet("bc.bank",null);
+  if(!b||!b.length) return defaultBank();
+  var ok=b.filter(okRow);
+  return ok.length?ok:defaultBank();
+}
+/* The pool a match draws from: subject is chosen by the wheel, so only difficulty,
+   language and the verified flag narrow it here. */
+function poolFor(bank,s){
+  return bank.filter(function(q){
+    if(s.difficulty!=="mixed"&&q.dif!==s.difficulty) return false;
+    if(s.verifiedOnly&&!q.verified) return false;
+    var sd=q[s.language||LANG];
+    if(!sd||!sd.q) return false;
+    return true;
+  });
+}
+var CSV_HEAD=["id","category","difficulty","answer","verified",
+  "scripture_en","question_en","a_en","b_en","c_en","d_en","explanation_en",
+  "scripture_es","question_es","a_es","b_es","c_es","d_es","explanation_es"];
+function csvCell(v){ v=(v==null?"":String(v)); return /[",\n;]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v; }
+function toCSV(bank){
+  var rows=[CSV_HEAD.join(",")];
+  bank.forEach(function(q){
+    var en=q.en||{o:[]}, es=q.es||{o:[]};
+    rows.push([q.id,q.cat,q.dif,"ABCD".charAt(q.a),q.verified?"yes":"no",
+      en.ref,en.q,(en.o||[])[0],(en.o||[])[1],(en.o||[])[2],(en.o||[])[3],en.e,
+      es.ref,es.q,(es.o||[])[0],(es.o||[])[1],(es.o||[])[2],(es.o||[])[3],es.e].map(csvCell).join(","));
+  });
+  return rows.join("\n");
+}
+function parseCSV(text){
+  var rows=[],row=[],cur="",q=false,i=0;
+  text=text.replace(/\r\n/g,"\n").replace(/\r/g,"\n");
+  for(;i<text.length;i++){
+    var ch=text[i];
+    if(q){ if(ch==='"'){ if(text[i+1]==='"'){cur+='"';i++;} else q=false; } else cur+=ch; }
+    else if(ch==='"'){ q=true; }
+    else if(ch===","){ row.push(cur); cur=""; }
+    else if(ch==="\n"){ row.push(cur); rows.push(row); row=[]; cur=""; }
+    else cur+=ch;
+  }
+  if(cur!==""||row.length){ row.push(cur); rows.push(row); }
+  return rows.filter(function(r){ return r.length>1||r[0]!==""; });
+}
+function packSide(q,o,e,ref){
+  var opts=(o||[]).map(function(x){ return String(x==null?"":x).trim(); });
+  return {q:String(q==null?"":q).trim(),o:opts,e:String(e==null?"":e).trim(),ref:String(ref==null?"":ref).trim()};
+}
+function fullSide(s){ return !!(s&&s.q&&s.o.length===4&&s.o.every(function(x){return x;})); }
+/* Accepts three shapes: the bilingual row this game writes, the suffixed CSV columns it
+   exports, and a plain single-language row like the one in the project brief. A row that
+   carries one language is copied into both so the game never shows an empty question. */
+/* A category may arrive as the internal id, or as the subject name in either language —
+   an exported bank uses the id, a hand-written one usually does not. */
+function resolveCat(raw){
+  var s=String(raw==null?"":raw).toLowerCase().trim();
+  if(!s) return null;
+  if(CAT_BY_ID[s]&&s!=="crown") return s;
+  for(var i=0;i<CATS.length;i++){
+    var c=CATS[i];
+    if(c.short.toLowerCase()===s) return c.id;
+    if(String(c.subject.en).toLowerCase()===s) return c.id;
+    if(String(c.subject.es).toLowerCase()===s) return c.id;
+  }
+  /* a couple of spellings the brief and older sheets use */
+  if(s.indexOf("prophec")>=0||s.indexOf("profec")>=0) return "prophecy";
+  if(s.indexOf("histor")>=0) return "history";
+  if(s.indexOf("geogra")>=0) return "geography";
+  if(s.indexOf("art")===0||s.indexOf("arte")===0||s.indexOf("music")>=0) return "art";
+  if(s.indexOf("sport")>=0||s.indexOf("deport")>=0) return "sports";
+  if(s.indexOf("econom")>=0) return "economics";
+  if(s.indexOf("riddl")>=0||s.indexOf("acertij")>=0) return "riddles";
+  return null;
+}
+function normalize(o){
+  if(!o) return null;
+  var cat=resolveCat(o.cat||o.category);
+  if(!cat) return null;
+  var dif=String(o.dif||o.difficulty||"medium").toLowerCase().trim();
+  if(DIFFS.indexOf(dif)<0) dif="medium";
+  var en=null, es=null, a;
+  if(o.en&&(o.en.q||o.es)){
+    en=packSide(o.en.q,o.en.o,o.en.e,o.en.ref);
+    es=o.es?packSide(o.es.q,o.es.o,o.es.e,o.es.ref):null;
+    a=(o.a!==undefined?o.a:o.answer);
+  } else if(o.question_en!==undefined||o.question_es!==undefined){
+    en=packSide(o.question_en,[o.a_en,o.b_en,o.c_en,o.d_en],o.explanation_en,o.scripture_en);
+    es=packSide(o.question_es,[o.a_es,o.b_es,o.c_es,o.d_es],o.explanation_es,o.scripture_es);
+    a=o.answer;
+  } else {
+    var opts=o.options&&o.options.length?o.options:[o.a,o.b,o.c,o.d];
+    var flat=packSide(o.q||o.question,opts,o.e||o.explanation,o.scripture||o.ref);
+    var lang=String(o.language||o.lang||LANG).toLowerCase().slice(0,2);
+    if(lang==="en"){ en=flat; } else { es=flat; }
+    a=(o.correctAnswer!==undefined?o.correctAnswer:o.answer);
+  }
+  if(typeof a==="string"){
+    var l=a.trim().toUpperCase().charAt(0);
+    a="ABCD".indexOf(l)>=0?"ABCD".indexOf(l):parseInt(a,10);
+  }
+  a=parseInt(a,10); if(isNaN(a)||a<0||a>3) return null;
+  if(!fullSide(en)&&!fullSide(es)) return null;
+  if(!fullSide(en)) en=clone(es);
+  if(!fullSide(es)) es=clone(en);
+  var v=o.verified;
+  v=(v===true||v==="yes"||v==="true"||v==="1"||v===1);
+  return {id:o.id||uid(),cat:cat,dif:dif,a:a,verified:v,en:en,es:es};
+}
+function parseImport(text){
+  text=(text||"").trim(); if(!text) return [];
+  var out=[];
+  if(text.charAt(0)==="["||text.charAt(0)==="{"){
+    var data=JSON.parse(text);
+    if(!Array.isArray(data)) data=data.questions||data.bank||[data];
+    data.forEach(function(o){ var n=normalize(o); if(n) out.push(n); });
+  } else {
+    var rows=parseCSV(text); if(rows.length<2) return [];
+    var head=rows[0].map(function(h){ return String(h).trim().toLowerCase(); });
+    for(var i=1;i<rows.length;i++){
+      var obj={}; head.forEach(function(h,j){ obj[h]=rows[i][j]; });
+      var n=normalize(obj); if(n) out.push(n);
+    }
+  }
+  return out;
+}
+
+/* ============================ small components ============================ */
+function Seg(props){
+  return html`<div class="seg" role="group">${props.items.map(function(it){
+    return html`<button key=${String(it.v)} type="button" aria-pressed=${String(props.value===it.v)}
+      onClick=${function(){ sfx("click"); props.onChange(it.v); }}>${it.l}</button>`;
+  })}</div>`;
+}
+function Tile(props){
+  var c=catOf(props.cat);
+  var cls="ctile"+(props.dim?" dim":"")+(props.on?" on":"")+(props.cls?" "+props.cls:"");
+  return html`<div class=${cls} style=${Object.assign(catVars(props.cat),props.style||{})}>
+    <img src=${c.img} alt=${cname(c)} draggable="false"/></div>`;
+}
+function llName(id){ return T["ll"+id.charAt(0).toUpperCase()+id.slice(1)]||id; }
+function llHint(id){ return T["ll"+id.charAt(0).toUpperCase()+id.slice(1)+"Hint"]||""; }
+function freshLifelines(){ var o={}; LIFELINES.forEach(function(l){ o[l.id]=true; }); return o; }
+function LLIcon(props){
+  var sz=props.size||18;
+  if(props.id==="scroll") return html`<svg viewBox="0 0 24 24" width=${sz} height=${sz} fill="none"
+    stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M6 3h12a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6"/>
+    <path d="M6 3a2 2 0 0 0-2 2v2h4"/><path d="M6 21a2 2 0 0 0 2-2V7"/>
+    <line x1="11" y1="9" x2="17" y2="9"/><line x1="11" y1="13" x2="17" y2="13"/></svg>`;
+  return html`<svg viewBox="0 0 24 24" width=${sz} height=${sz} fill="none" stroke="currentColor"
+    stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <circle cx="9" cy="8" r="3.2"/><path d="M2.8 20c0-3.4 2.8-6.2 6.2-6.2S15.2 16.6 15.2 20"/>
+    <circle cx="17.6" cy="9.8" r="2.3"/><path d="M15.9 14.9c2.9.2 5.3 2.6 5.3 5.1"/></svg>`;
+}
+function Toast(props){
+  useEffect(function(){ var t=setTimeout(props.onDone,2600); return function(){clearTimeout(t);}; },[]);
+  return html`<div class="toast">${props.msg}</div>`;
+}
+
+/* ============================ wheel ============================ */
+/* Eight slots. Each one carries a circular medallion of its champion, clipped in SVG so the
+   portrait crop reads as a framed coin rather than a cut-out. */
+var SEG=360/WHEEL.length;
+function Wheel(props){
+  var r=96, cx=100, cy=100, mr=61, rad=19;
+  function pt(deg,rd){ var a=(deg-90)*Math.PI/180; return [cx+rd*Math.cos(a), cy+rd*Math.sin(a)]; }
+  var clips=WHEEL.map(function(c,i){
+    var mid=pt(i*SEG+SEG/2,mr);
+    return html`<clipPath key=${c.id} id=${"clip-"+c.id}>
+      <circle cx=${mid[0].toFixed(2)} cy=${mid[1].toFixed(2)} r=${rad}/></clipPath>`;
+  });
+  var sectors=WHEEL.map(function(c,i){
+    var a1=i*SEG, a2=a1+SEG;
+    var p1=pt(a1,r), p2=pt(a2,r), mid=pt(a1+SEG/2,mr);
+    return html`<g key=${c.id}>
+      <path d=${"M"+cx+","+cy+" L"+p1[0].toFixed(2)+","+p1[1].toFixed(2)+" A"+r+","+r+" 0 0 1 "+p2[0].toFixed(2)+","+p2[1].toFixed(2)+" Z"}
+        fill=${"var(--c-"+c.id+")"} stroke="rgba(255,255,255,.92)" stroke-width="1.3"/>
+      <image href=${c.img} x=${(mid[0]-rad).toFixed(2)} y=${(mid[1]-rad).toFixed(2)}
+        width=${rad*2} height=${rad*2} preserveAspectRatio="xMidYMin slice"
+        clip-path=${"url(#clip-"+c.id+")"}/>
+      <circle cx=${mid[0].toFixed(2)} cy=${mid[1].toFixed(2)} r=${rad}
+        fill="none" stroke="#fff" stroke-width="2"/>
+    </g>`;
+  });
+  return html`<div class="wheel-stage">
+    <div class="wheel-glow"></div>
+    <div class=${"pointer"+(props.landed?" hit":"")}></div>
+    <div class=${"wheel-rotor"+(props.spinning?" spin":"")} style=${{transform:"rotate("+props.rot+"deg)"}}>
+      <svg viewBox="0 0 200 200" width="100%" height="100%" aria-hidden="true">
+        <defs>${clips}</defs>
+        <circle cx="100" cy="100" r="99" fill="rgba(255,255,255,.95)"/>
+        ${sectors}
+        <circle cx="100" cy="100" r="96.5" fill="none" stroke="rgba(255,255,255,.95)" stroke-width="5"/>
+      </svg>
+    </div>
+    <button class="spin-hub" onClick=${props.onSpin} disabled=${props.spinning||props.disabled}
+      aria-label=${T.spin}>${props.spinning?T.spinning:T.spin}</button>
+  </div>`;
+}
+
+/* ============================ team seat ============================ */
+function TeamCard(props){
+  var team=props.team, s=props.settings;
+  return html`<div class=${"team-card"+(props.active?" active":"")} style=${{"--tc":team.color}}>
+    <div class="thead">
+      <span class="tname">${team.name}</span>
+      <span class="score tnum">${team.score}</span>
+    </div>
+    <div class="slots">
+      ${CATS.map(function(c){
+        var got=team.unlocked.indexOf(c.id)>=0;
+        return html`<${Tile} key=${c.id} cat=${c.id} on=${got} dim=${!got}/>`;
+      })}
+    </div>
+    <div class="meter">
+      <span class="ll-mini">${LIFELINES.map(function(l){
+        var left=!!(team.lifelines&&team.lifelines[l.id]);
+        return html`<span key=${l.id} class=${left?"":"spent"} title=${llName(l.id)+(left?"":" — "+T.llUsed)}>
+          <${LLIcon} id=${l.id} size=${13}/></span>`;
+      })}</span>
+      <span class="spacer"></span>
+      <span class="tnum">${team.unlocked.length}/${CATS.length}</span>
+    </div>
+  </div>`;
+}
+/* ============================ host drawer ============================ */
+/* The teacher's own controls. Anything that cannot be undone asks first. */
+function Drawer(props){
+  var m=props.match, setM=props.setMatch, s=m.settings, au=props.audio;
+  var cf=useState(null), confirm=cf[0], setConfirm=cf[1];
+  function patchSettings(k,v){
+    setM(function(p){ var ns=Object.assign({},p.settings); ns[k]=v;
+      var np=Object.assign({},p,{settings:ns});
+      if(k==="timer"&&p.phase!=="question"){ np.timeLeft=v; np.timeMax=v; }
+      return np; });
+  }
+  function bump(i,d){
+    setM(function(p){ var ts=clone(p.teams); ts[i].score=Math.max(0,ts[i].score+d); return Object.assign({},p,{teams:ts}); });
+  }
+  function toggleChar(i,cid){
+    setM(function(p){
+      var ts=clone(p.teams), tm=ts[i], k=tm.unlocked.indexOf(cid);
+      if(k>=0){ tm.unlocked.splice(k,1); tm.progress[cid]=0; }
+      else { tm.unlocked.push(cid); tm.progress[cid]=p.settings.needed; }
+      return Object.assign({},p,{teams:ts});
+    });
+  }
+  function ask(msg,fn){ sfx("click"); setConfirm({msg:msg,fn:fn}); }
+  return html`<aside class="drawer" role="dialog" aria-label=${T.teacher}>
+    <div class="row between">
+      <strong style=${{fontFamily:"var(--f-display)",fontSize:"19px"}}>${T.teacher}</strong>
+      <button class="icon-btn" onClick=${props.onClose} aria-label=${T.close}>✕</button>
+    </div>
+
+    ${confirm?html`<div class="confirm">
+      <div style=${{marginBottom:"9px"}}>${confirm.msg}</div>
+      <div class="row">
+        <button class="btn sm danger" onClick=${function(){ var f=confirm.fn; setConfirm(null); f(); }}>${T.yes}</button>
+        <button class="btn sm ghost" onClick=${function(){ setConfirm(null); }}>${T.no}</button>
+      </div></div>`:null}
+
+    <h3>${T.pause}</h3>
+    <div class="row">
+      <button class=${"btn sm"+(m.paused?"":" ghost")}
+        onClick=${function(){ sfx("click"); setM(function(p){return Object.assign({},p,{paused:!p.paused});}); }}>
+        ${m.paused?T.unpause:T.pause}</button>
+      <button class="btn sm ghost" disabled=${m.phase!=="question"}
+        onClick=${function(){ sfx("click"); props.onSkip(); }}>${T.skip}</button>
+    </div>
+
+    <h3>${T.activeTeam}</h3>
+    <${Seg} value=${m.turn} onChange=${function(v){ setM(function(p){ return Object.assign({},p,{turn:v}); }); }}
+      items=${m.teams.map(function(tm,i){ return {v:i,l:tm.name}; })}/>
+
+    <h3>${T.sound}</h3>
+    <div class="row">
+      <button class=${"btn sm"+(au.sfx?"":" ghost")} onClick=${function(){ props.setAudio({sfx:!au.sfx}); }}>
+        ${T.sound}: ${au.sfx?T.on:T.off}</button>
+      <button class=${"btn sm"+(au.music?"":" ghost")} onClick=${function(){ props.setAudio({music:!au.music}); }}>
+        ${T.music}: ${au.music?T.on:T.off}</button>
+    </div>
+    <div class="field" style=${{marginTop:"10px"}}><span class="label">${T.volume}</span>
+      <${Seg} value=${au.vol} onChange=${function(v){ props.setAudio({vol:v}); }}
+        items=${[{v:0.35,l:T.low},{v:0.75,l:T.medium},{v:1,l:T.high}]}/></div>
+
+    <h3>${T.adjust}</h3>
+    ${m.teams.map(function(tm,i){ return html`<div key=${tm.id} class="row between" style=${{marginBottom:"8px"}}>
+      <span class="row" style=${{gap:"8px",minWidth:0}}>
+        <span style=${{width:"10px",height:"10px",borderRadius:"50%",background:tm.color,display:"inline-block"}}></span>
+        <b style=${{fontSize:"13.5px"}}>${tm.name}</b>
+        <span class="tnum muted" style=${{fontSize:"13px"}}>${tm.score}</span>
+      </span>
+      <span class="row" style=${{gap:"6px"}}>
+        <button class="btn sm ghost" onClick=${function(){bump(i,-100);}}>−100</button>
+        <button class="btn sm ghost" onClick=${function(){bump(i,100);}}>+100</button>
+      </span></div>`; })}
+
+    <h3>${T.chars}</h3>
+    ${m.teams.map(function(tm,i){ return html`<div key=${tm.id} style=${{marginBottom:"12px"}}>
+      <div class="row between" style=${{marginBottom:"6px"}}>
+        <b style=${{fontSize:"13.5px"}}>${tm.name}</b>
+        <span class="tnum muted" style=${{fontSize:"12px"}}>${tm.unlocked.length}/${CATS.length}</span>
+      </div>
+      <div class="row" style=${{gap:"6px"}}>
+        ${CATS.map(function(c){ var got=tm.unlocked.indexOf(c.id)>=0;
+          return html`<button key=${c.id} class="icon-btn" title=${cname(c)+" — "+(got?T.revoke:T.grant)}
+            onClick=${function(){ if(got){ ask(T.revoke+": "+cname(c)+" — "+tm.name+"?",function(){ toggleChar(i,c.id); }); }
+                                  else { sfx("click"); toggleChar(i,c.id); } }}
+            style=${{padding:"2px",overflow:"hidden",width:"42px",height:"42px",
+              borderColor:got?"var(--c-"+c.id+")":"var(--line)"}}>
+            <${Tile} cat=${c.id} dim=${!got} style=${{width:"100%"}}/>
+          </button>`; })}
+      </div></div>`; })}
+
+    <h3>${T.lifelines}</h3>
+    ${m.teams.map(function(tm,i){ return html`<div key=${tm.id} class="row between" style=${{marginBottom:"8px"}}>
+      <b style=${{fontSize:"13.5px"}}>${tm.name}</b>
+      <span class="row" style=${{gap:"6px"}}>
+        ${LIFELINES.map(function(l){
+          var left=!!(tm.lifelines&&tm.lifelines[l.id]);
+          return html`<button key=${l.id} class=${"btn sm"+(left?" ghost":"")}
+            title=${llName(l.id)+" — "+(left?T.llUsed:T.llGiveBack)}
+            onClick=${function(){ sfx("click"); setM(function(p){
+              var ts=clone(p.teams);
+              if(!ts[i].lifelines) ts[i].lifelines=freshLifelines();
+              ts[i].lifelines[l.id]=!ts[i].lifelines[l.id];
+              return Object.assign({},p,{teams:ts});
+            }); }}><${LLIcon} id=${l.id} size=${15}/></button>`;
+        })}
+      </span></div>`; })}
+
+    <h3>${T.setup}</h3>
+    <div class="field"><span class="label">${T.timeLimit}</span>
+      <${Seg} value=${s.timer} onChange=${function(v){patchSettings("timer",v);}}
+        items=${[15,20,30,45,60].map(function(v){return {v:v,l:v+T.sec};})}/></div>
+    <div class="field" style=${{marginTop:"12px"}}><span class="label">${T.needed}</span>
+      <${Seg} value=${s.needed} onChange=${function(v){patchSettings("needed",v);}}
+        items=${[1,2,3].map(function(v){return {v:v,l:String(v)};})}/></div>
+    <div class="field" style=${{marginTop:"12px"}}><span class="label">${T.difficulty}</span>
+      <${Seg} value=${s.difficulty} onChange=${function(v){patchSettings("difficulty",v);}}
+        items=${[{v:"easy",l:T.easy},{v:"medium",l:T.medium},{v:"hard",l:T.hard},{v:"mixed",l:T.mixed}]}/></div>
+    <div class="field" style=${{marginTop:"12px"}}><span class="label">${T.language}</span>
+      <${Seg} value=${s.language} onChange=${function(v){patchSettings("language",v);}}
+        items=${LANGS.map(function(l){return {v:l.id,l:l.name};})}/></div>
+
+    <h3>${T.review}</h3>
+    ${m.log.length?m.log.slice(0,14).map(function(L,i){
+      return html`<div key=${i} class="log-item" style=${{"--lc":L.ok?"var(--good)":"var(--bad)"}}>
+        <b>${L.team}</b> · ${subj(catOf(L.cat))}${L.crown?" ♛":""} · ${L.ok?T.correct:(L.timeout?T.timeup:T.incorrect)}<br/>
+        <span class="muted">${L.q}</span></div>`;
+    }):html`<p class="muted" style=${{fontSize:"13.5px"}}>${T.noLog}</p>`}
+
+    <h3>${T.restart}</h3>
+    <div class="row">
+      <button class="btn sm ghost" onClick=${function(){ ask(T.restart+" — "+T.confirmSure,props.onRestart); }}>${T.restart}</button>
+      <button class="btn sm ghost" onClick=${function(){ ask(T.exit+" — "+T.confirmSure,props.onExit); }}>${T.exit}</button>
+    </div>
+  </aside>`;
+}
+
+/* ============================ game ============================ */
+/* Seats ring the wheel: two face each other, a third sits below, a fourth set takes the corners. */
+function seatStyle(i,n){
+  var maps={
+    2:[{gridColumn:1,gridRow:2},{gridColumn:3,gridRow:2}],
+    3:[{gridColumn:1,gridRow:2},{gridColumn:3,gridRow:2},{gridColumn:2,gridRow:3}],
+    4:[{gridColumn:1,gridRow:1},{gridColumn:3,gridRow:1},{gridColumn:1,gridRow:3},{gridColumn:3,gridRow:3}]
+  };
+  var m=maps[n]||maps[2];
+  return m[i]||{gridColumn:1,gridRow:2};
+}
+function Sparks(){
+  var bits=[];
+  for(var i=0;i<18;i++){
+    var a=i/18*6.283, d=120+Math.random()*120;
+    bits.push(html`<i key=${i} style=${{"--dx":(Math.cos(a)*d).toFixed(0)+"px",
+      "--dy":(Math.sin(a)*d).toFixed(0)+"px",animationDelay:(i*0.03)+"s"}}></i>`);
+  }
+  return html`<span class="sparks" aria-hidden="true">${bits}</span>`;
+}
+function Game(props){
+  var m=props.match, setM=props.setMatch, bank=props.bank;
+  var s=m.settings, team=m.teams[m.turn];
+  var st=useState(0), rot=st[0], setRot=st[1];
+  var sp=useState(false), spinning=sp[0], setSpinning=sp[1];
+  var ld=useState(false), landed=ld[0], setLanded=ld[1];
+  var dr=useState(false), drawer=dr[0], setDrawer=dr[1];
+  var to=useState(null), toast=to[0], setToast=to[1];
+  var fl=useState(false), flash=fl[0], setFlash=fl[1];
+  var timers=useRef([]);
+  useEffect(function(){ return function(){ timers.current.forEach(clearTimeout); }; },[]);
+  function later(fn,ms){ var id=setTimeout(fn,ms); timers.current.push(id); return id; }
+
+  useEffect(function(){
+    if(m.phase==="question") musicStart("quiz");
+    else if(m.phase==="victory") musicStart("victory");
+    else musicStart("board");
+  },[m.phase]);
+
+  useEffect(function(){
+    if(m.phase!=="question"||m.paused||m.consult) return;
+    var iv=setInterval(function(){
+      setM(function(p){
+        if(p.phase!=="question"||p.paused||p.consult) return p;
+        return Object.assign({},p,{timeLeft:Math.max(0,Math.round((p.timeLeft-0.25)*100)/100)});
+      });
+    },250);
+    return function(){ clearInterval(iv); };
+  },[m.phase,m.paused,!!m.consult]);
+  useEffect(function(){ if(m.phase==="question"&&m.timeLeft<=0) answer(null); },[m.phase,m.timeLeft]);
+  useEffect(function(){
+    if(m.phase==="question"&&!m.paused&&!m.consult&&m.timeLeft>0&&m.timeLeft<=5&&m.timeLeft%1===0) sfx("tick");
+  },[m.timeLeft]);
+
+  /* the "ask a team" window runs on its own clock while the question clock waits */
+  useEffect(function(){
+    if(!m.consult||m.paused) return;
+    var iv=setInterval(function(){
+      setM(function(p){
+        if(!p.consult||p.paused) return p;
+        var left=Math.max(0,Math.round((p.consult.left-0.25)*100)/100);
+        return Object.assign({},p,{consult:left<=0?null:{left:left,total:p.consult.total}});
+      });
+    },250);
+    return function(){ clearInterval(iv); };
+  },[!!m.consult,m.paused]);
+  useEffect(function(){
+    if(m.consult&&!m.paused&&m.consult.left>0&&m.consult.left<=5&&m.consult.left%1===0) sfx("tick");
+  },[m.consult&&m.consult.left]);
+
+  /* a match never runs on past a full collection, however the champion was granted */
+  useEffect(function(){
+    if(m.phase==="victory"||m.phase==="unlock"||m.pendingUnlock) return;
+    for(var i=0;i<m.teams.length;i++){
+      if(m.teams[i].unlocked.length>=CATS.length){
+        sfx("win"); confetti(11000);
+        setM(function(p){ return Object.assign({},p,{phase:"victory",winner:i,endedAt:Date.now()}); });
+        return;
+      }
+    }
+  },[m.teams,m.phase]);
+
+  useEffect(function(){
+    function onKey(ev){
+      var tag=(ev.target&&ev.target.tagName)||"";
+      if(tag==="INPUT"||tag==="TEXTAREA"||tag==="SELECT") return;
+      if(m.paused) return;
+      if(m.phase==="question"){
+        var k=String(ev.key).toLowerCase();
+        var i="abcd".indexOf(k); if(i<0) i="1234".indexOf(k);
+        if(i>=0){ ev.preventDefault(); answer(i); }
+      } else if(ev.key===" "||ev.key==="Enter"){
+        if(m.phase==="spin"){ ev.preventDefault(); spin(); }
+        else if(m.phase==="feedback"){ ev.preventDefault(); cont(); }
+        else if(m.phase==="unlock"){ ev.preventDefault(); collect(); }
+        else if(m.phase==="crownIntro"){ ev.preventDefault(); toPick(); }
+      }
+    }
+    window.addEventListener("keydown",onKey);
+    return function(){ window.removeEventListener("keydown",onKey); };
+  },[m,rot,spinning]);
+
+  /* One place decides what an answer is worth: points by difficulty, the crown bonus, the
+     unlock bonus, and whether this answer completes a champion. */
+  function resolveAnswer(p,pick){
+    var q=p.q, ok=(pick!==null&&pick===q.a);
+    var teams=clone(p.teams), tm=teams[p.turn];
+    var gained=0, unlock=null, crownMissed=false;
+    if(ok){
+      gained=POINTS[q.dif]||100;
+      tm.correct++;
+      if(q.crown){ gained+=CROWN_BONUS; tm.crownWins=(tm.crownWins||0)+1; }
+      if(tm.unlocked.indexOf(q.cat)<0){
+        if(q.crown){
+          /* the crown challenge wins the champion outright, whatever `needed` says */
+          tm.progress[q.cat]=p.settings.needed; tm.unlocked.push(q.cat); unlock=q.cat;
+        } else {
+          tm.progress[q.cat]=(tm.progress[q.cat]||0)+1;
+          if(tm.progress[q.cat]>=p.settings.needed){ tm.unlocked.push(q.cat); unlock=q.cat; }
+        }
+        if(unlock) gained+=UNLOCK_BONUS;
+      }
+      tm.score+=gained;
+    } else {
+      tm.wrong++;
+      if(q.crown) crownMissed=true;
+    }
+    var log=p.log.slice(0,59);
+    log.unshift({team:tm.name,cat:q.cat,ok:ok,timeout:pick===null,crown:!!q.crown,q:q.q});
+    return Object.assign({},p,{phase:"feedback",teams:teams,pick:pick,ok:ok,gained:gained,
+      pendingUnlock:unlock,crownMissed:crownMissed,log:log,consult:null});
+  }
+  function answer(pick){
+    if(m.phase!=="question") return;
+    var next=resolveAnswer(m,pick);
+    sfx(next.ok?"good":"bad");
+    setM(next);
+  }
+  function cont(){
+    sfx("click");
+    if(m.pendingUnlock){ sfx("unlock"); confetti(3000); setM(Object.assign({},m,{phase:"unlock"})); return; }
+    setM(Object.assign({},m,{crownMissed:false}));
+    later(nextTurn,10);
+  }
+  function collect(){
+    sfx("click");
+    var next=Object.assign({},m,{pendingUnlock:null,crownMissed:false});
+    if(m.teams[m.turn].unlocked.length>=CATS.length){
+      sfx("win"); confetti(11000);
+      setM(Object.assign(next,{phase:"victory",winner:m.turn,endedAt:Date.now()}));
+      return;
+    }
+    setM(next);
+    later(nextTurn,10);
+  }
+  /* each lifeline is good once per team for the whole match */
+  function useLifeline(id){
+    if(m.phase!=="question"||m.paused||m.consult) return;
+    var tm=m.teams[m.turn];
+    if(!tm.lifelines||!tm.lifelines[id]) return;
+    var spec=LIFELINES.filter(function(l){ return l.id===id; })[0];
+    if(!spec) return;
+    sfx("unlock");
+    setM(function(p){
+      var teams=clone(p.teams);
+      teams[p.turn].lifelines[id]=false;
+      if(spec.mode==="extend"){
+        return Object.assign({},p,{teams:teams,
+          timeLeft:p.timeLeft+spec.secs,
+          timeMax:(p.timeMax||p.settings.timer)+spec.secs});
+      }
+      return Object.assign({},p,{teams:teams,consult:{left:spec.secs,total:spec.secs}});
+    });
+  }
+  function toPick(){ sfx("click"); setM(function(p){ return Object.assign({},p,{phase:"crownPick"}); }); }
+  function nextTurn(){
+    setLanded(false);
+    setM(function(p){ return Object.assign({},p,{phase:"spin",turn:(p.turn+1)%p.teams.length,
+      q:null,cat:null,pick:null,ok:null,gained:0,pendingUnlock:null,
+      crownMissed:false,fromWheel:false,timeLeft:p.settings.timer,timeMax:p.settings.timer,
+      consult:null,recycled:false}); });
+  }
+  function drawQuestion(p,catId,isCrown){
+    var pool=poolFor(bank,p.settings).filter(function(q){ return q.cat===catId; });
+    if(!pool.length) return null;
+    var used=p.used||{};
+    var avail=pool.filter(function(q){ return !used[q.id]; });
+    var recycled=false;
+    /* never block a match for running out: the subject's questions come back round */
+    if(!avail.length){ used=Object.assign({},used); pool.forEach(function(q){ delete used[q.id]; }); avail=pool; recycled=true; }
+    var row=avail[Math.floor(Math.random()*avail.length)];
+    var v=side(row,p.settings.language);
+    var order=p.settings.shuffleOpts?shuffle([0,1,2,3]):[0,1,2,3];
+    var nu=Object.assign({},used); nu[row.id]=1;
+    return {used:nu,recycled:recycled,q:{
+      id:row.id,cat:row.cat,dif:row.dif,crown:!!isCrown,verified:!!row.verified,
+      q:v.q,o:order.map(function(k){return v.o[k];}),a:order.indexOf(row.a),e:v.e,ref:v.ref}};
+  }
+  function loadQuestion(catId,isCrown){
+    setM(function(p){
+      var d=drawQuestion(p,catId,isCrown);
+      if(!d) return Object.assign({},p,{phase:isCrown?"crownPick":"spin",noPool:true});
+      return Object.assign({},p,{phase:"question",q:d.q,used:d.used,
+        timeLeft:p.settings.timer,timeMax:p.settings.timer,consult:null,
+        pick:null,ok:null,recycled:d.recycled,noPool:false});
+    });
+  }
+  useEffect(function(){ if(m.noPool){ setToast(T.noQuestions); setM(function(p){return Object.assign({},p,{noPool:false});}); } },[m.noPool]);
+  useEffect(function(){ if(m.recycled){ setToast(T.recycled); setM(function(p){return Object.assign({},p,{recycled:false});}); } },[m.recycled]);
+
+  function spin(){
+    if(spinning||m.phase!=="spin"||m.paused) return;
+    audioResume(); setLanded(false);
+    var i=Math.floor(Math.random()*WHEEL.length);
+    var target=(360-(i*SEG+SEG/2)+360)%360;
+    var delta=(((target-(rot%360))%360)+360)%360;
+    setRot(rot+360*6+delta); setSpinning(true); sfx("riser");
+    later(function(){
+      setSpinning(false); setLanded(true); sfx("land");
+      var hit=WHEEL[i];
+      setM(function(p){ return Object.assign({},p,{phase:"reveal",cat:hit.id}); });
+      later(function(){
+        if(hit.id==="crown"){
+          sfx("crown");
+          setFlash(true); later(function(){ setFlash(false); },1100);
+          setM(function(p){ return Object.assign({},p,{phase:"crownIntro",fromWheel:true}); });
+        } else {
+          loadQuestion(hit.id,false);
+        }
+      },1500);
+    },5250);
+  }
+  function skip(){ setDrawer(false); nextTurn(); }
+  function restart(){
+    setDrawer(false); setLanded(false);
+    setM(function(p){
+      var ts=p.teams.map(function(tm){ var n=clone(tm);
+        n.score=0; n.correct=0; n.wrong=0; n.unlocked=[]; n.progress={}; n.crownWins=0;
+        n.lifelines=freshLifelines(); return n; });
+      return Object.assign({},p,{teams:ts,turn:0,used:{},log:[],phase:"spin",q:null,cat:null,
+        pick:null,ok:null,gained:0,pendingUnlock:null,crownMissed:false,
+        fromWheel:false,winner:null,paused:false,timeLeft:p.settings.timer,timeMax:p.settings.timer});
+    });
+  }
+
+  if(m.phase==="victory"){
+    var w=m.teams[m.winner];
+    var ranked=m.teams.slice().sort(function(a,b){ return (b.unlocked.length-a.unlocked.length)||(b.score-a.score); });
+    return html`<div class="wrap victory">
+      <div style=${{fontSize:"58px",lineHeight:1}}>🏆</div>
+      <div class="eyebrow">${T.winner}</div>
+      <h2 class="winner-name">${w.name}</h2>
+      <span class="chip gold tnum" style=${{fontSize:"16px"}}>${T.finalScore}: ${w.score} ${T.pts}</span>
+      <div class="winner-cast">${CATS.map(function(c){ return html`<${Tile} key=${c.id} cat=${c.id} on=${true}/>`; })}</div>
+      <${Tile} cat="crown" style=${{width:"120px"}}/>
+      <div class="card results">
+        <div class="eyebrow" style=${{marginBottom:"12px"}}>${T.summary}</div>
+        <table><thead><tr>
+          <th>${T.team}</th><th>${T.characters}</th><th>${T.crowns}</th>
+          <th>${T.hits}</th><th>${T.misses}</th><th style=${{textAlign:"right"}}>${T.score}</th>
+        </tr></thead><tbody>
+        ${ranked.map(function(tm){ return html`<tr key=${tm.id}>
+          <td><span style=${{display:"inline-block",width:"9px",height:"9px",borderRadius:"50%",
+            background:tm.color,marginRight:"9px"}}></span>${tm.name}</td>
+          <td class="tnum">${tm.unlocked.length}/${CATS.length}</td>
+          <td class="tnum">${tm.crownWins||0}</td>
+          <td class="tnum">${tm.correct}</td><td class="tnum">${tm.wrong}</td>
+          <td class="num">${tm.score}</td>
+        </tr>`; })}
+        </tbody></table>
+      </div>
+      <div class="row" style=${{justifyContent:"center"}}>
+        <button class="btn lg" onClick=${function(){ sfx("click"); restart(); }}>${T.playAgain}</button>
+        <button class="btn lg ghost" onClick=${function(){ sfx("click"); props.onNewGame(); }}>${T.newGame}</button>
+      </div>
+    </div>`;
+  }
+
+  var middle;
+  if(m.phase==="question"||m.phase==="feedback"){
+    var q=m.q, c=catOf(q.cat), done=m.phase==="feedback";
+    var tmax=m.timeMax||s.timer;
+    var pct=clamp(m.timeLeft/tmax*100,0,100);
+    var prog=(team.progress&&team.progress[q.cat])||0;
+    middle=html`<div class=${"qcard"+(q.crown?" crown":"")} style=${catVars(q.cat)}>
+      <div class="qhead">
+        <${Tile} cat=${q.cat}/>
+        <span class="cat">${cname(c)}</span>
+        <span class="tag cat">${subj(c)}</span>
+        ${q.crown?html`<span class="chip gold">♛ ${T.crownQuestion}</span>`:null}
+        <span class="tag">${T[q.dif]} · ${POINTS[q.dif]}</span>
+        ${!q.crown&&team.unlocked.indexOf(q.cat)<0
+          ?html`<span class="tag">${T.progress} ${Math.min(prog,s.needed)}/${s.needed}</span>`:null}
+        ${!q.verified?html`<span class="tag warn">${T.unverified}</span>`:null}
+      </div>
+      <div class="timer-track"><div class=${"timer-fill"+(m.timeLeft<=5?" warn":"")} style=${{width:pct+"%"}}></div></div>
+      <h2 class="qtext">${q.q}</h2>
+      <div class="opts">
+        ${q.o.map(function(txt,i){
+          var cls="opt";
+          if(done){ cls+= i===q.a?" correct":(i===m.pick?" wrong":" dim"); }
+          return html`<button key=${i} class=${cls} disabled=${done||m.paused}
+            onClick=${function(){ answer(i); }}>
+            <span class="key">${"ABCD".charAt(i)}</span><span>${txt}</span></button>`;
+        })}
+      </div>
+      ${!done?html`<div class="lifelines">
+        ${LIFELINES.map(function(l){
+          var left=!!(team.lifelines&&team.lifelines[l.id]);
+          return html`<button key=${l.id} class="ll" disabled=${!left||!!m.consult}
+            title=${llHint(l.id)} onClick=${function(){ useLifeline(l.id); }}>
+            <${LLIcon} id=${l.id}/>
+            <span class="nm">${llName(l.id)}</span>
+            <span class="secs">${left?"+"+l.secs+"s":T.llUsed}</span></button>`;
+        })}
+        <span class="hint">${T.llOnce}</span>
+      </div>`:null}
+      ${done?html`<div class=${"verdict "+(m.ok?"ok":"no")}>
+          <span class="big">${m.ok?T.correct:(m.pick===null?T.timeup:T.incorrect)}</span>
+          ${m.ok?html`<span class="chip tnum">+${m.gained} ${T.pts}</span>`:null}
+          ${m.crownMissed?html`<span class="chip">${T.crownMissed}</span>`:null}
+        </div>
+        <div class="explain">
+          ${q.ref?html`<span class="tag ref scripture">${q.ref}</span><br/>`:null}
+          ${!m.ok?html`<b>${T.answerWas}: ${"ABCD".charAt(q.a)}. ${q.o[q.a]}</b><br/>`:null}
+          ${q.e}
+          ${m.ok&&!m.pendingUnlock&&!q.crown&&team.unlocked.indexOf(q.cat)>=0
+            ?html`<div style=${{marginTop:"7px",fontSize:"13.5px"}}>${T.already}</div>`:null}
+        </div>
+        <button class="btn block" onClick=${cont}>${m.pendingUnlock?T.collect:T.next}</button>`:null}
+    </div>`;
+  } else if(m.phase==="crownPick"){
+    var mine=m.teams[m.turn];
+    middle=html`<div style=${{display:"flex",flexDirection:"column",alignItems:"center",gap:"16px",width:"100%"}}>
+      <div style=${{textAlign:"center"}}>
+        <div class="eyebrow">♛ ${T.crownQuestion}</div>
+        <h2 style=${{fontSize:"clamp(20px,2.8vw,28px)",marginTop:"5px"}}>${T.crownPick}</h2>
+      </div>
+      <div class="crown-pick">
+        ${CATS.map(function(c){
+          var got=mine.unlocked.indexOf(c.id)>=0;
+          return html`<button key=${c.id} class="pick-btn" style=${catVars(c.id)} disabled=${got}
+            onClick=${function(){ sfx("click"); loadQuestion(c.id,true); }}>
+            <${Tile} cat=${c.id} dim=${got} on=${!got}/>
+            <span class="nm">${c.short}</span>
+            <span class="got">${got?T.collected:subj(c)}</span>
+          </button>`;
+        })}
+      </div>
+    </div>`;
+  } else if(m.phase==="reveal"){
+    var rc=catOf(m.cat);
+    middle=html`<${React.Fragment}>
+      <${Wheel} rot=${rot} spinning=${false} landed=${landed} disabled=${true} onSpin=${function(){}}/>
+      <div class="cat-reveal" style=${catVars(m.cat)}>
+        <${Tile} cat=${m.cat} on=${true}/>
+        <span class="nm">${rc.short}<small>${subj(rc)}</small></span></div>
+    <//>`;
+  } else {
+    /* the hub stays dead unless it really is this team's moment to spin: an overlay on top of
+       it (unlock, crown) must not leave a live button underneath */
+    middle=html`<${Wheel} rot=${rot} spinning=${spinning} landed=${landed}
+      disabled=${m.paused||m.phase!=="spin"} onSpin=${spin}/>`;
+  }
+
+  return html`<div class="wrap">
+    <div class="topbar">
+      <span class="brand">Bible <span>Champions</span></span>
+      <span class="spacer"></span>
+      ${m.paused?html`<span class="chip">⏸ ${T.paused}</span>`:null}
+      <button class="icon-btn" title=${T.music}
+        onClick=${function(){ props.setAudio({music:!props.audio.music}); }}>${props.audio.music?"♪":"𝄽"}</button>
+      <button class="icon-btn" title=${T.teacher} onClick=${function(){ sfx("click"); setDrawer(true); }}>⚙</button>
+    </div>
+    <div class="turn-bar" style=${{"--tc":team.color}}>
+      <span class="eyebrow">${T.turn}</span>
+      <span class="who">${team.name}</span>
+      <span class="spacer"></span>
+      <span class="chip tnum">${team.score} ${T.pts}</span>
+      <span class="chip tnum">${team.unlocked.length}/${CATS.length}</span>
+    </div>
+    <div class="arena">
+      <div class="center">${middle}</div>
+      ${m.teams.map(function(tm,i){
+        return html`<div key=${tm.id} class="seat" style=${seatStyle(i,m.teams.length)}>
+          <${TeamCard} team=${tm} settings=${s} active=${i===m.turn}/></div>`;
+      })}
+    </div>
+
+    ${flash?html`<div class="goldflash" aria-hidden="true"></div>`:null}
+
+    ${m.consult?html`<div class="overlay">
+      <div class="sheet">
+        <div class="eyebrow">${T.consultTitle}</div>
+        <div style=${{color:"var(--gold)"}}><${LLIcon} id="ask" size=${54}/></div>
+        <div class="consult-num tnum">${Math.ceil(m.consult.left)}</div>
+        <div class="consult-ring"><i style=${{width:(m.consult.left/m.consult.total*100)+"%"}}></i></div>
+        <p class="muted" style=${{fontWeight:700}}>${T.consultSub}</p>
+        <button class="btn lg block" onClick=${function(){ sfx("click"); setM(function(p){ return Object.assign({},p,{consult:null}); }); }}>${T.consultDone}</button>
+      </div></div>`:null}
+
+    ${m.phase==="unlock"&&m.pendingUnlock?html`<div class="overlay">
+      <div class="rays"></div>
+      <div class="sheet" style=${catVars(m.pendingUnlock)}>
+        <${Sparks}/>
+        <div class="eyebrow">${T.unlocked}</div>
+        <${Tile} cat=${m.pendingUnlock} cls="hero" on=${true}/>
+        <h2 style=${{color:"var(--cc)",fontSize:"clamp(21px,3.4vw,30px)"}}>${cname(catOf(m.pendingUnlock))}</h2>
+        <span class="chip gold tnum">${team.name} · +${UNLOCK_BONUS} ${T.pts}</span>
+        <button class="btn lg block" onClick=${collect}>${T.collect}</button>
+      </div></div>`:null}
+
+    ${m.phase==="crownIntro"?html`<div class="overlay">
+      <div class="rays"></div>
+      <div class="sheet">
+        <${Sparks}/>
+        <div class="eyebrow">${m.fromWheel?T.crownLanded:T.crownQuestion}</div>
+        <${Tile} cat="crown" cls="hero"/>
+        <h2 class="crown-title">${T.crownPower}</h2>
+        <span class="chip gold">${team.name}</span>
+        <p class="muted" style=${{fontWeight:600,fontSize:"14.5px"}}>${T.crownIntro}</p>
+        <button class="btn lg block" onClick=${toPick}>${T.continueB}</button>
+      </div></div>`:null}
+
+    ${drawer?html`<${Drawer} match=${m} setMatch=${setM} audio=${props.audio} setAudio=${props.setAudio}
+      onClose=${function(){setDrawer(false);}} onSkip=${skip} onRestart=${restart} onExit=${props.onExit}/>`:null}
+    ${toast?html`<${Toast} msg=${toast} onDone=${function(){setToast(null);}}/>`:null}
+  </div>`;
+}
+/* ============================ shared chrome ============================ */
+function TopBar(props){
+  return html`<div class="topbar">
+    ${props.back?html`<button class="btn sm ghost" onClick=${function(){ sfx("click"); props.back(); }}>← ${T.backHome}</button>`
+               :html`<span class="brand">Bible <span>Champions</span></span>`}
+    <span class="spacer"></span>
+    ${props.title?html`<span class="eyebrow">${props.title}</span>`:null}
+    <button class="icon-btn" title=${T.music}
+      onClick=${function(){ props.setAudio({music:!props.audio.music}); }}>${props.audio.music?"♪":"𝄽"}</button>
+  </div>`;
+}
+function toggleFullscreen(){
+  try{
+    if(document.fullscreenElement) document.exitFullscreen();
+    else document.documentElement.requestFullscreen();
+  }catch(e){}
+}
+
+/* ============================ home ============================ */
+function Home(props){
+  return html`<div class="wrap">
+    <${TopBar} audio=${props.audio} setAudio=${props.setAudio}/>
+    <div class="home">
+      <h1 class="logo"><span class="l1">BIBLE</span><span class="l2">CHAMPIONS</span></h1>
+      <p class="tagline">${T.tagline}</p>
+      <${Tile} cat="crown" cls="crown-hero"/>
+      <div class="cast">
+        ${CATS.map(function(c){ return html`<figure key=${c.id} style=${catVars(c.id)}>
+          <${Tile} cat=${c.id} on=${true}/>
+          <figcaption>${c.short}<small>${subj(c)}</small></figcaption>
+        </figure>`; })}
+      </div>
+      <div class="home-actions">
+        <button class="btn lg" onClick=${function(){ audioResume(); sfx("click"); props.go("setup"); }}>${T.start}</button>
+        ${props.hasMatch?html`<button class="btn lg ghost" onClick=${function(){ audioResume(); sfx("click"); props.go("game"); }}>${T.resume}</button>`:null}
+        <button class="btn lg ghost" onClick=${function(){ sfx("click"); props.go("howto"); }}>${T.howto}</button>
+        <button class="btn lg ghost" onClick=${function(){ sfx("click"); props.go("bank"); }}>${T.bank}</button>
+        <button class="btn lg ghost" onClick=${function(){ sfx("click"); props.go("settings"); }}>${T.settings}</button>
+      </div>
+      <p class="home-note">${T.homeNote}</p>
+    </div>
+  </div>`;
+}
+
+/* ============================ how to play ============================ */
+function steps(){
+  if(LANG==="en") return [
+    ["Form the teams","Two to four teams, each with a name and a colour. They sit around the wheel."],
+    ["Spin the wheel","Eight slots: the seven champions and Crown."],
+    ["Answer in time","Four options, one correct. Running out of time counts as a wrong answer."],
+    ["Spend a lifeline","The Scroll buys 30 more seconds and Ask a team gives 15 seconds to consult another team. One use of each per match."],
+    ["Collect a champion","Enough correct answers in a subject and that champion joins your collection."],
+    ["Crown is a shortcut, not a gift","Land on Crown and you choose any champion you are missing — then answer one special question from that subject. Right, it is yours at once. Wrong, you lose the turn."],
+    ["Win the match","The first team holding all seven champions wins."]
+  ];
+  return [
+    ["Formen los equipos","De dos a cuatro equipos, cada uno con nombre y color. Se sientan alrededor de la ruleta."],
+    ["Giren la ruleta","Ocho secciones: los siete campeones y Crown."],
+    ["Respondan a tiempo","Cuatro opciones, una correcta. Quedarse sin tiempo cuenta como fallo."],
+    ["Usen un comodín","El Rollo da 30 segundos más y Consultar da 15 segundos para preguntar a otro equipo. Un uso de cada uno por partida."],
+    ["Consigan un campeón","Con suficientes aciertos en una categoría, ese campeón se une a su colección."],
+    ["Crown es un atajo, no un regalo","Si caen en Crown eligen cualquier campeón que les falte y responden una pregunta especial de esa categoría. Si aciertan, es suyo de inmediato. Si fallan, pierden el turno."],
+    ["Ganen la partida","El primer equipo que reúna los siete campeones gana."]
+  ];
+}
+function HowTo(props){
+  return html`<div class="wrap" style=${{paddingBottom:"48px"}}>
+    <${TopBar} back=${function(){props.go("home");}} title=${T.rulesTitle}
+      audio=${props.audio} setAudio=${props.setAudio}/>
+    <div class="card" style=${{marginBottom:"18px"}}>
+      <div class="steps">
+        ${steps().map(function(s,i){ return html`<div key=${i} class="step">
+          <span class="n">${i+1}</span>
+          <div><h4>${s[0]}</h4><p>${s[1]}</p></div></div>`; })}
+      </div>
+    </div>
+    <div class="grid2">
+      <div class="card">
+        <div class="eyebrow">${T.score}</div>
+        <table style=${{marginTop:"10px",minWidth:0}}><tbody>
+          <tr><td>${T.easy}</td><td class="num">100</td></tr>
+          <tr><td>${T.medium}</td><td class="num">200</td></tr>
+          <tr><td>${T.hard}</td><td class="num">300</td></tr>
+          <tr><td><b>${T.collect}</b></td><td class="num">+${UNLOCK_BONUS}</td></tr>
+          <tr><td><b>${T.crownQuestion}</b></td><td class="num">+${CROWN_BONUS}</td></tr>
+        </tbody></table>
+      </div>
+      <div class="card">
+        <div class="eyebrow">${T.lifelines}</div>
+        <div style=${{display:"grid",gap:"12px",marginTop:"12px"}}>
+          ${LIFELINES.map(function(l){ return html`<div key=${l.id} class="row" style=${{gap:"12px",flexWrap:"nowrap"}}>
+            <span style=${{color:"var(--gold)",flex:"0 0 auto"}}><${LLIcon} id=${l.id} size=${26}/></span>
+            <b style=${{fontSize:"15px"}}>${llName(l.id)}
+              <br/><span class="muted" style=${{fontWeight:600,fontSize:"13px"}}>${llHint(l.id)}</span></b>
+          </div>`; })}
+        </div>
+        <p class="hint" style=${{marginTop:"12px"}}>${T.llOnce}</p>
+      </div>
+      <div class="card">
+        <div class="eyebrow">${T.characters}</div>
+        <div style=${{display:"grid",gap:"10px",marginTop:"10px"}}>
+          ${WHEEL.map(function(c){ return html`<div key=${c.id} class="row" style=${{gap:"12px",flexWrap:"nowrap"}}>
+            <${Tile} cat=${c.id} on=${true} style=${{width:"48px",flex:"0 0 auto"}}/>
+            <b style=${{color:"var(--c-"+c.id+")",fontSize:"15px"}}>${cname(c)}
+              <br/><span class="muted" style=${{fontWeight:600,fontSize:"13px"}}>${subj(c)}</span></b>
+          </div>`; })}
+        </div>
+      </div>
+    </div>
+    <p class="muted" style=${{marginTop:"16px",fontSize:"14px",fontWeight:600}}>
+      <span class="kbd">space</span> · <span class="kbd">A</span>–<span class="kbd">D</span>
+      · <span class="kbd">1</span>–<span class="kbd">4</span> · ⚙ ${T.teacher}</p>
+    <div style=${{marginTop:"18px"}}>
+      <button class="btn lg" onClick=${function(){ sfx("click"); props.go("home"); }}>${T.gotIt}</button></div>
+  </div>`;
+}
+
+/* ============================ settings ============================ */
+function Settings(props){
+  var s=props.settings, au=props.audio;
+  function patch(k,v){ props.setSettings(function(p){ var n=Object.assign({},p); n[k]=v; return n; }); }
+  return html`<div class="wrap" style=${{paddingBottom:"48px"}}>
+    <${TopBar} back=${function(){props.go("home");}} title=${T.settings}
+      audio=${props.audio} setAudio=${props.setAudio}/>
+    <div class="card grid2">
+      <div class="field"><span class="label">${T.language}</span>
+        <${Seg} value=${s.language} onChange=${function(v){patch("language",v);}}
+          items=${LANGS.map(function(l){return {v:l.id,l:l.name};})}/>
+        <span class="hint">${T.langHint}</span></div>
+      <div class="field"><span class="label">${T.sound}</span>
+        <${Seg} value=${au.sfx} onChange=${function(v){ props.setAudio({sfx:v}); }}
+          items=${[{v:true,l:T.on},{v:false,l:T.off}]}/></div>
+      <div class="field"><span class="label">${T.music}</span>
+        <${Seg} value=${au.music} onChange=${function(v){ props.setAudio({music:v}); }}
+          items=${[{v:true,l:T.on},{v:false,l:T.off}]}/></div>
+      <div class="field"><span class="label">${T.volume}</span>
+        <${Seg} value=${au.vol} onChange=${function(v){ props.setAudio({vol:v}); }}
+          items=${[{v:0.35,l:T.low},{v:0.75,l:T.medium},{v:1,l:T.high}]}/></div>
+      <div class="field"><span class="label">${T.motion}</span>
+        <${Seg} value=${!!s.calm} onChange=${function(v){patch("calm",v);}}
+          items=${[{v:false,l:T.motionFull},{v:true,l:T.motionCalm}]}/></div>
+      <div class="field"><span class="label">${T.fullscreen}</span>
+        <div><button class="btn sm ghost" onClick=${function(){ sfx("click"); toggleFullscreen(); }}>
+          ${document.fullscreenElement?T.exitFs:T.enterFs}</button></div></div>
+    </div>
+    <p class="hint" style=${{marginTop:"14px"}}>${T.settingsNote}</p>
+    <div style=${{marginTop:"18px"}}>
+      <button class="btn lg" onClick=${function(){ sfx("click"); props.go("home"); }}>${T.gotIt}</button></div>
+  </div>`;
+}
+
+/* ============================ setup ============================ */
+function Setup(props){
+  var bank=props.bank;
+  var cs=useState(clone(props.settings)), cfg=cs[0], setCfg=cs[1];
+  function patch(k,v){ setCfg(function(p){ var n=Object.assign({},p); n[k]=v; return n; }); }
+  function setCount(n){
+    setCfg(function(p){
+      var ts=p.teams.slice(0,n);
+      while(ts.length<n) ts.push({name:(LANG==="en"?"Team ":"Equipo ")+(ts.length+1),color:TEAM_COLORS[ts.length]});
+      return Object.assign({},p,{teams:ts});
+    });
+  }
+  function setTeam(i,k,v){ setCfg(function(p){ var ts=clone(p.teams); ts[i][k]=v; return Object.assign({},p,{teams:ts}); }); }
+  var pool=useMemo(function(){ return poolFor(bank,cfg); },[bank,cfg.difficulty,cfg.language,cfg.verifiedOnly]);
+  var perCat=CATS.map(function(c){ return {c:c,n:pool.filter(function(q){return q.cat===c.id;}).length}; });
+  var thin=perCat.some(function(x){ return x.n<3; });
+  return html`<div class="wrap" style=${{paddingBottom:"48px"}}>
+    <${TopBar} back=${function(){props.go("home");}} title=${T.setup}
+      audio=${props.audio} setAudio=${props.setAudio}/>
+    <div class="card" style=${{marginBottom:"18px"}}>
+      <div class="field"><span class="label">${T.numTeams}</span>
+        <${Seg} value=${cfg.teams.length} onChange=${setCount}
+          items=${[2,3,4].map(function(n){return {v:n,l:n+" "+T.howManyTeams};})}/></div>
+      <div style=${{display:"grid",gap:"11px",marginTop:"16px"}}>
+        ${cfg.teams.map(function(tm,i){ return html`<div key=${i} class="team-row" style=${{"--tc":tm.color}}>
+          <div class="field"><span class="label">${T.teamName} ${i+1}</span>
+            <input type="text" id=${"team-name-"+i} value=${tm.name} maxLength="22"
+              onChange=${function(e){ setTeam(i,"name",e.target.value); }}/></div>
+          <div class="field" style=${{flex:"2 1 250px"}}><span class="label">${T.color}</span>
+            <div class="swatches">${TEAM_COLORS.map(function(col){
+              return html`<button key=${col} class="swatch" style=${{background:col}} aria-label=${col}
+                aria-pressed=${String(tm.color===col)} onClick=${function(){ sfx("click"); setTeam(i,"color",col); }}></button>`;
+            })}</div></div>
+        </div>`; })}
+      </div>
+    </div>
+    <div class="card grid2" style=${{marginBottom:"18px"}}>
+      <div class="field"><span class="label">${T.language}</span>
+        <${Seg} value=${cfg.language} onChange=${function(v){patch("language",v);}}
+          items=${LANGS.map(function(l){return {v:l.id,l:l.name};})}/>
+        <span class="hint">${T.langHint}</span></div>
+      <div class="field"><span class="label">${T.difficulty}</span>
+        <${Seg} value=${cfg.difficulty} onChange=${function(v){patch("difficulty",v);}}
+          items=${[{v:"easy",l:T.easy},{v:"medium",l:T.medium},{v:"hard",l:T.hard},{v:"mixed",l:T.mixed}]}/></div>
+      <div class="field"><span class="label">${T.timeLimit}</span>
+        <${Seg} value=${cfg.timer} onChange=${function(v){patch("timer",v);}}
+          items=${[15,20,30,45,60].map(function(v){return {v:v,l:v+" "+T.sec};})}/></div>
+      <div class="field"><span class="label">${T.needed}</span>
+        <${Seg} value=${cfg.needed} onChange=${function(v){patch("needed",v);}}
+          items=${[1,2,3].map(function(v){return {v:v,l:String(v)};})}/>
+        <span class="hint">${T.neededHint}</span></div>
+      <div class="field"><span class="label">${T.options}</span>
+        <${Seg} value=${cfg.shuffleOpts} onChange=${function(v){patch("shuffleOpts",v);}}
+          items=${[{v:true,l:T.shuffleOpts},{v:false,l:T.fixedOpts}]}/></div>
+      <div class="field"><span class="label">${T.verified}</span>
+        <${Seg} value=${!!cfg.verifiedOnly} onChange=${function(v){patch("verifiedOnly",v);}}
+          items=${[{v:true,l:T.onlyVerified},{v:false,l:T.anyQ}]}/></div>
+    </div>
+    <div class="card flat" style=${{marginBottom:"18px"}}>
+      <div class="eyebrow">${pool.length} ${T.available}</div>
+      <div class="row" style=${{marginTop:"11px",gap:"7px"}}>
+        ${perCat.map(function(x){ return html`<span key=${x.c.id} class="tag cat" style=${catVars(x.c.id)}>
+          ${subj(x.c)} ${x.n}</span>`; })}
+      </div>
+      ${thin?html`<p class="hint" style=${{marginTop:"11px"}}>${T.shortBank}</p>`:null}
+    </div>
+    <button class="btn lg block" disabled=${pool.length===0}
+      onClick=${function(){ audioResume(); sfx("click"); props.onStart(cfg); }}>${T.startMatch}</button>
+  </div>`;
+}
+
+/* ============================ question bank ============================ */
+function blankQ(){
+  return {cat:"prophecy",dif:"easy",a:0,verified:false,
+    en:{q:"",o:["","","",""],e:"",ref:""},
+    es:{q:"",o:["","","",""],e:"",ref:""}};
+}
+function QForm(props){
+  var st=useState(props.value), v=st[0], setV=st[1];
+  function p(k,val){ setV(function(o){ var n=clone(o); n[k]=val; return n; }); }
+  function ps(lang,k,val){ setV(function(o){ var n=clone(o); n[lang][k]=val; return n; }); }
+  function po(lang,i,val){ setV(function(o){ var n=clone(o); n[lang].o[i]=val; return n; }); }
+  var valid=(fullSide(v.en)||fullSide(v.es));
+  function langBlock(lang,label){
+    var sd=v[lang];
+    return html`<div class="card flat" style=${{marginTop:"16px"}}>
+      <div class="eyebrow">${label}</div>
+      <div class="field" style=${{marginTop:"12px"}}><span class="label">${T.question}</span>
+        <input type="text" id=${"qf-q-"+lang} value=${sd.q} onChange=${function(e){ ps(lang,"q",e.target.value); }}/></div>
+      <div class="field" style=${{marginTop:"14px"}}><span class="label">${T.options}</span>
+        ${[0,1,2,3].map(function(i){ return html`<div key=${i} class="row" style=${{gap:"9px",marginBottom:"7px",flexWrap:"nowrap"}}>
+          <span style=${{width:"30px",height:"30px",display:"grid",placeItems:"center",borderRadius:"50%",flex:"0 0 auto",
+            background:v.a===i?"var(--good)":"rgba(255,255,255,.14)",color:v.a===i?"#02331c":"#fff",
+            fontWeight:900,fontSize:"13px"}}>${"ABCD".charAt(i)}</span>
+          <input type="text" id=${"qf-o-"+lang+"-"+i} value=${sd.o[i]} onChange=${function(e){ po(lang,i,e.target.value); }}/></div>`; })}
+      </div>
+      <div class="field" style=${{marginTop:"14px"}}><span class="label">${T.scripture}</span>
+        <input type="text" id=${"qf-ref-"+lang} value=${sd.ref} onChange=${function(e){ ps(lang,"ref",e.target.value); }}/></div>
+      <div class="field" style=${{marginTop:"14px"}}><span class="label">${T.explanation}</span>
+        <input type="text" id=${"qf-e-"+lang} value=${sd.e} onChange=${function(e){ ps(lang,"e",e.target.value); }}/></div>
+    </div>`;
+  }
+  return html`<div class="card" style=${{marginBottom:"16px",borderColor:"var(--gold)"}}>
+    <div class="grid2">
+      <div class="field"><span class="label">${T.category}</span>
+        <${Seg} value=${v.cat} onChange=${function(x){p("cat",x);}} items=${CATS.map(function(c){return {v:c.id,l:subj(c)};})}/></div>
+      <div class="field"><span class="label">${T.difficulty}</span>
+        <${Seg} value=${v.dif} onChange=${function(x){p("dif",x);}} items=${DIFFS.map(function(d){return {v:d,l:T[d]};})}/></div>
+      <div class="field"><span class="label">${T.answer}</span>
+        <${Seg} value=${v.a} onChange=${function(x){p("a",x);}} items=${[0,1,2,3].map(function(i){return {v:i,l:"ABCD".charAt(i)};})}/></div>
+      <div class="field"><span class="label">${T.verified}</span>
+        <${Seg} value=${!!v.verified} onChange=${function(x){p("verified",x);}}
+          items=${[{v:true,l:T.verified},{v:false,l:T.unverified}]}/>
+        <span class="hint">${T.verifyHint}</span></div>
+    </div>
+    ${langBlock("es",T.esText)}
+    ${langBlock("en",T.bothLangs)}
+    <div class="row" style=${{marginTop:"18px"}}>
+      <button class="btn" disabled=${!valid} onClick=${function(){ sfx("click"); props.onSave(v); }}>${T.save}</button>
+      <button class="btn ghost" onClick=${function(){ sfx("click"); props.onCancel(); }}>${T.cancel}</button>
+    </div>
+  </div>`;
+}
+
+function Bank(props){
+  var bank=props.bank, setBank=props.setBank;
+  var f=useState({cat:"all",dif:"all",ver:"all",q:""}), flt=f[0], setFlt=f[1];
+  var e=useState(null), editing=e[0], setEditing=e[1];
+  var io=useState(null), ioMode=io[0], setIoMode=io[1];
+  var tx=useState(""), text=tx[0], setText=tx[1];
+  var ts=useState(null), toast=ts[0], setToast=ts[1];
+  var fm=useState("json"), fmt=fm[0], setFmt=fm[1];
+  var cf=useState(null), confirm=cf[0], setConfirm=cf[1];
+  function patch(k,v){ setFlt(function(p){ var n=Object.assign({},p); n[k]=v; return n; }); }
+  var list=useMemo(function(){
+    var needle=flt.q.trim().toLowerCase();
+    return bank.filter(function(q){
+      if(flt.cat!=="all"&&q.cat!==flt.cat) return false;
+      if(flt.dif!=="all"&&q.dif!==flt.dif) return false;
+      if(flt.ver==="yes"&&!q.verified) return false;
+      if(flt.ver==="no"&&q.verified) return false;
+      if(needle){
+        var a=side(q,"en"), b=side(q,"es");
+        var hay=(a.q+" "+a.o.join(" ")+" "+a.ref+" "+b.q+" "+b.o.join(" ")+" "+b.ref).toLowerCase();
+        if(hay.indexOf(needle)<0) return false;
+      }
+      return true;
+    });
+  },[bank,flt]);
+  var pending=bank.filter(function(q){ return !q.verified; }).length;
+  function save(v){
+    var n=normalize(v); if(!n){ setToast(T.badData); return; }
+    setBank(function(b){
+      if(v.id){ return b.map(function(q){ return q.id===v.id?Object.assign(n,{id:v.id}):q; }); }
+      return b.concat([Object.assign(n,{id:uid("BIB-")})]);
+    });
+    setEditing(null); setToast(T.saved);
+  }
+  function del(id){ setBank(function(b){ return b.filter(function(q){ return q.id!==id; }); }); }
+  function doExport(kind){ setFmt(kind); setIoMode("export"); setText(kind==="json"?JSON.stringify(bank,null,1):toCSV(bank)); }
+  function doImport(replace){
+    var parsed; try{ parsed=parseImport(text); }catch(err){ parsed=null; }
+    if(!parsed||!parsed.length){ setToast(T.badData); return; }
+    setBank(function(b){ return replace?parsed:b.concat(parsed); });
+    setToast(parsed.length+" "+T.imported); setIoMode(null); setText("");
+  }
+  function selectArea(){ var a=document.getElementById("io-area"); if(a){ a.focus(); a.select(); } }
+  function copyOut(){
+    try{ navigator.clipboard.writeText(text).then(function(){ setToast(T.copied); },selectArea); }
+    catch(err){ selectArea(); }
+  }
+  return html`<div class="wrap" style=${{paddingBottom:"48px"}}>
+    <${TopBar} back=${function(){props.go("home");}} title=${T.bank}
+      audio=${props.audio} setAudio=${props.setAudio}/>
+    <div class="card">
+      <div class="toolbar">
+        <div class="field"><span class="label">${T.search}</span>
+          <input type="text" id="bank-search" value=${flt.q} placeholder="…" onChange=${function(ev){patch("q",ev.target.value);}}/></div>
+        <div class="field"><span class="label">${T.category}</span>
+          <select id="bank-cat" value=${flt.cat} onChange=${function(ev){patch("cat",ev.target.value);}}>
+            <option value="all">${T.all}</option>
+            ${CATS.map(function(c){ return html`<option key=${c.id} value=${c.id}>${subj(c)}</option>`; })}
+          </select></div>
+        <div class="field"><span class="label">${T.difficulty}</span>
+          <select id="bank-dif" value=${flt.dif} onChange=${function(ev){patch("dif",ev.target.value);}}>
+            <option value="all">${T.all}</option>
+            ${DIFFS.map(function(d){ return html`<option key=${d} value=${d}>${T[d]}</option>`; })}
+          </select></div>
+        <div class="field"><span class="label">${T.verified}</span>
+          <select id="bank-ver" value=${flt.ver} onChange=${function(ev){patch("ver",ev.target.value);}}>
+            <option value="all">${T.all}</option>
+            <option value="yes">${T.verified}</option>
+            <option value="no">${T.unverified}</option>
+          </select></div>
+      </div>
+      <div class="row" style=${{marginTop:"14px"}}>
+        <button class="btn sm" onClick=${function(){ sfx("click"); setEditing(blankQ()); setIoMode(null); }}>+ ${T.addQ}</button>
+        <button class="btn sm ghost" onClick=${function(){ sfx("click"); setIoMode("import"); setText(""); setEditing(null); }}>${T.importT}</button>
+        <button class="btn sm ghost" onClick=${function(){ sfx("click"); doExport("json"); setEditing(null); }}>${T.exportT} JSON</button>
+        <button class="btn sm ghost" onClick=${function(){ sfx("click"); doExport("csv"); setEditing(null); }}>${T.exportT} CSV</button>
+        <button class="btn sm ghost" onClick=${function(){ sfx("click"); setConfirm("restore"); }}>${T.restoreDefaults}</button>
+        <span class="spacer"></span><span class="chip tnum">${list.length} / ${bank.length}</span>
+      </div>
+      ${pending?html`<p class="hint" style=${{marginTop:"10px"}}>${pending} ${T.reviewFlag}</p>`:null}
+      ${confirm==="restore"?html`<div class="confirm" style=${{marginTop:"12px"}}>
+        <div style=${{marginBottom:"9px"}}>${T.restoreDefaults} — ${T.confirmSure}</div>
+        <div class="row">
+          <button class="btn sm danger" onClick=${function(){ setBank(defaultBank()); setConfirm(null); setToast(T.saved); }}>${T.yes}</button>
+          <button class="btn sm ghost" onClick=${function(){ setConfirm(null); }}>${T.no}</button>
+        </div></div>`:null}
+    </div>
+
+    ${ioMode==="export"?html`<div class="card" style=${{marginTop:"16px"}}>
+      <div class="row between"><span class="eyebrow">${T.exportT} · ${fmt.toUpperCase()}</span>
+        <button class="icon-btn" onClick=${function(){setIoMode(null);}} aria-label=${T.close}>✕</button></div>
+      <p class="hint" style=${{margin:"8px 0 10px"}}>${T.exportHint}</p>
+      <textarea id="io-area" readOnly value=${text}></textarea>
+      <div class="row" style=${{marginTop:"12px"}}>
+        <button class="btn sm" onClick=${copyOut}>${T.copy}</button>
+        <button class="btn sm ghost" onClick=${function(){ doExport(fmt==="json"?"csv":"json"); }}>${fmt==="json"?"CSV":"JSON"}</button>
+      </div></div>`:null}
+
+    ${ioMode==="import"?html`<div class="card" style=${{marginTop:"16px"}}>
+      <div class="row between"><span class="eyebrow">${T.importT}</span>
+        <button class="icon-btn" onClick=${function(){setIoMode(null);}} aria-label=${T.close}>✕</button></div>
+      <p class="hint" style=${{margin:"8px 0 10px"}}>${T.importHint}</p>
+      <textarea id="io-area" value=${text} onChange=${function(ev){ setText(ev.target.value); }}></textarea>
+      <div class="row" style=${{marginTop:"12px"}}>
+        <button class="btn sm" onClick=${function(){ doImport(false); }}>${T.merge}</button>
+        <button class="btn sm ghost" onClick=${function(){ doImport(true); }}>${T.replaceAll}</button>
+      </div></div>`:null}
+
+    ${editing?html`<div style=${{marginTop:"16px"}}>
+      <${QForm} value=${editing} onSave=${save} onCancel=${function(){setEditing(null);}}/></div>`:null}
+
+    <div class="bank-list">
+      ${list.length?list.map(function(q){
+        var c=catOf(q.cat), v=side(q);
+        return html`<div key=${q.id} class="qrow" style=${catVars(q.cat)}>
+          <div class="meta">
+            <span class="tag cat">${subj(c)}</span>
+            <span class="tag">${T[q.dif]}</span>
+            ${v.ref?html`<span class="tag ref">${v.ref}</span>`:null}
+            <span class=${"tag"+(q.verified?"":" warn")}>${q.verified?T.verified:T.unverified}</span>
+            <span class="tag">${q.id}</span>
+            <span class="spacer"></span>
+            <button class="btn sm ghost" onClick=${function(){ sfx("click"); setEditing(clone(q)); setIoMode(null); window.scrollTo({top:0,behavior:"smooth"}); }}>${T.edit}</button>
+            <button class="btn sm ghost" onClick=${function(){ sfx("click"); del(q.id); }}>${T.del}</button>
+          </div>
+          <div class="qq">${v.q}</div>
+          <div class="ans">${"ABCD".charAt(q.a)}. ${v.o[q.a]}</div>
+          <div class="exp">${v.e}</div>
+        </div>`;
+      }):html`<div class="empty">${T.noQuestions}</div>`}
+    </div>
+    ${toast?html`<${Toast} msg=${toast} onDone=${function(){setToast(null);}}/>`:null}
+  </div>`;
+}
+
+/* ============================ app ============================ */
+var DEFAULT_SETTINGS={
+  teams:[{name:"Equipo 1",color:TEAM_COLORS[0]},{name:"Equipo 2",color:TEAM_COLORS[1]}],
+  language:"es", difficulty:"mixed", timer:30, needed:2,
+  shuffleOpts:true, verifiedOnly:true, calm:false
+};
+function App(){
+  var sc=useState("home"), screen=sc[0], setScreen=sc[1];
+  var bs=useState(loadBank), bank=bs[0], setBank=bs[1];
+  var ss=useState(function(){ return Object.assign({},DEFAULT_SETTINGS,lsGet("bc.settings",{})); }), settings=ss[0], setSettings=ss[1];
+  var ad=useState(function(){ return Object.assign({sfx:true,music:true,vol:0.75},lsGet("bc.audio",{})); }), audio=ad[0], setAudioState=ad[1];
+  var ms=useState(function(){
+    var saved=lsGet("bc.match",null);
+    /* a saved match from an older shape is better dropped than opened broken */
+    if(saved&&saved.teams&&saved.teams.length&&saved.teams[0].progress&&saved.settings){
+      if(saved.phase==="spinning"||saved.phase==="reveal") saved.phase="spin";
+      saved.teams.forEach(function(t){
+        if(!t.lifelines) t.lifelines=freshLifelines();
+        if(t.crownWins===undefined) t.crownWins=0;
+      });
+      if(saved.timeMax===undefined) saved.timeMax=saved.settings.timer||30;
+      if(!saved.settings.language) saved.settings.language="es";
+      saved.consult=null; saved.paused=false;
+      return saved;
+    }
+    return null;
+  }), match=ms[0], setMatch=ms[1];
+
+  /* the language in play: a running match keeps the one it was started with */
+  var lang=(screen==="game"&&match&&match.settings.language)||settings.language;
+  setLang(lang);
+
+  function setAudio(patch){
+    setAudioState(function(p){ var n=Object.assign({},p,patch); applyAudio(n); audioResume(); return n; });
+  }
+  useEffect(function(){ lsSet("bc.bank",bank); },[bank]);
+  useEffect(function(){ lsSet("bc.settings",settings); },[settings]);
+  useEffect(function(){ lsSet("bc.audio",audio); applyAudio(audio); },[audio]);
+  useEffect(function(){ if(match) lsSet("bc.match",match); else lsDel("bc.match"); },[match]);
+  useEffect(function(){ document.documentElement.lang=lang; },[lang]);
+  useEffect(function(){
+    document.documentElement.classList.toggle("calm",!!settings.calm);
+  },[settings.calm]);
+  useEffect(function(){
+    function once(){ audioResume(); }
+    window.addEventListener("pointerdown",once,{once:true});
+    window.addEventListener("keydown",once,{once:true});
+    return function(){ window.removeEventListener("pointerdown",once); window.removeEventListener("keydown",once); };
+  },[]);
+  useEffect(function(){ if(screen!=="game") musicStart("menu"); },[screen]);
+
+  function start(cfg){
+    setSettings(cfg);
+    var teams=cfg.teams.map(function(tm,i){
+      return {id:"t"+i+"_"+Date.now().toString(36),
+        name:(tm.name||((LANG==="en"?"Team ":"Equipo ")+(i+1))).trim(),
+        color:tm.color,score:0,correct:0,wrong:0,unlocked:[],progress:{},crownWins:0,
+        lifelines:freshLifelines()};
+    });
+    setMatch({settings:clone(cfg),teams:teams,turn:0,used:{},log:[],phase:"spin",q:null,cat:null,
+      pick:null,ok:null,gained:0,pendingUnlock:null,crownMissed:false,
+      fromWheel:false,winner:null,paused:false,timeLeft:cfg.timer,timeMax:cfg.timer,startedAt:Date.now()});
+    setScreen("game");
+  }
+  function newGame(){ setMatch(null); setScreen("setup"); }
+  function exitHome(){ setScreen("home"); }
+
+  var common={audio:audio,setAudio:setAudio,go:setScreen};
+  var view;
+  if(screen==="game"&&match){
+    view=html`<${Game} match=${match} setMatch=${setMatch} bank=${bank}
+      audio=${audio} setAudio=${setAudio} onExit=${exitHome} onNewGame=${newGame}/>`;
+  } else if(screen==="setup"){
+    view=html`<${Setup} ...${common} settings=${settings} bank=${bank} onStart=${start}/>`;
+  } else if(screen==="howto"){
+    view=html`<${HowTo} ...${common}/>`;
+  } else if(screen==="settings"){
+    view=html`<${Settings} ...${common} settings=${settings} setSettings=${setSettings}/>`;
+  } else if(screen==="bank"){
+    view=html`<${Bank} ...${common} bank=${bank} setBank=${setBank}/>`;
+  } else {
+    view=html`<${Home} ...${common} hasMatch=${!!(match&&match.phase!=="victory")}/>`;
+  }
+  return html`<${React.Fragment}><${Stars}/><div class="app">${view}</div><//>`;
+}
+
+var root=ReactDOM.createRoot(document.getElementById("root"));
+function boot(){ root.render(html`<${App}/>`); }
+if(window.claude&&window.claude.hot&&window.claude.hot.ready){ window.claude.hot.ready(boot); } else { boot(); }
+})();
+</script>
+</body>
+</html>
