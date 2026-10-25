@@ -85,6 +85,18 @@ With **Earn lifelines** on (the default), a team is given one more — picked at
 ones it is not full on — for every three correct answers in a row and for every crown challenge
 won. Turn it off at setup for a strictly one-of-each match.
 
+### On the board
+
+A card announces each change of turn. Under the turn bar, a strip ranks the teams live —
+champions first, points as the tie-break — because with four teams in the four corners the race
+is otherwise hard to read. Each team card counts its score up rather than jumping, floats the
+points it just won, and carries a bar under every medallion showing how close that champion is
+(when more than one correct answer is needed).
+
+Spin with the hub, with `space`, or by flicking across the wheel on a touch screen. The wheel
+runs five to seven turns, never quite the same length twice, and notches as the pointer crosses
+each slot.
+
 Keyboard: `space` spins and advances, `A`–`D` or `1`–`4` answer, the gear opens the host panel.
 
 ## Host panel

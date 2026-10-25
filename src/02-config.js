@@ -91,6 +91,7 @@ var STR={
   startMatch:{en:"Start match",es:"Empezar partida"}, backHome:{en:"Home",es:"Inicio"},
   spin:{en:"SPIN",es:"GIRAR"}, spinning:{en:"…",es:"…"},
   turn:{en:"Turn",es:"Turno"}, score:{en:"Score",es:"Puntos"}, pts:{en:"pts",es:"pts"},
+  turnOf:{en:"Now playing",es:"Juega ahora"}, rank:{en:"Standings",es:"Clasificación"},
   easy:{en:"Easy",es:"Fácil"}, medium:{en:"Medium",es:"Media"}, hard:{en:"Hard",es:"Difícil"},
   mixed:{en:"Mixed",es:"Mixta"}, all:{en:"All",es:"Todas"},
   correct:{en:"Correct!",es:"¡Correcto!"}, incorrect:{en:"Not quite",es:"Incorrecto"},

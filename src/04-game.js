@@ -169,7 +169,10 @@ function Game(props){
   var m=props.match, setM=props.setMatch, bank=props.bank;
   var s=m.settings, team=m.teams[m.turn];
   var st=useState(0), rot=st[0], setRot=st[1];
+  var du=useState(5.2), dur=du[0], setDur=du[1];
   var sp=useState(false), spinning=sp[0], setSpinning=sp[1];
+  var tc=useState(false), turnCard=tc[0], setTurnCard=tc[1];
+  var seat=useRef(-1);
   var ld=useState(false), landed=ld[0], setLanded=ld[1];
   var dr=useState(false), drawer=dr[0], setDrawer=dr[1];
   var to=useState(null), toast=to[0], setToast=to[1];
@@ -177,6 +180,15 @@ function Game(props){
   var timers=useRef([]);
   useEffect(function(){ return function(){ timers.current.forEach(clearTimeout); }; },[]);
   function later(fn,ms){ var id=setTimeout(fn,ms); timers.current.push(id); return id; }
+
+  /* the wheel passing from one team to the next is the beat of the game: announce it */
+  useEffect(function(){
+    if(m.phase==="victory"){ seat.current=-1; return; }
+    if(seat.current===m.turn) return;
+    seat.current=m.turn;
+    setTurnCard(true);
+    later(function(){ setTurnCard(false); },1700);
+  },[m.turn,m.phase]);
 
   useEffect(function(){
     if(m.phase==="question") musicStart("quiz");
@@ -406,9 +418,13 @@ function Game(props){
     if(spinning||m.phase!=="spin"||m.paused) return;
     audioResume(); setLanded(false);
     var i=Math.floor(Math.random()*WHEEL.length);
+    /* no two spins alike: between five and seven turns, and never quite the same length */
+    var turns=5+Math.floor(Math.random()*3);
+    var secs=calmMode()?1.2:(4.6+Math.random()*1.2);
     var target=(360-(i*SEG+SEG/2)+360)%360;
     var delta=(((target-(rot%360))%360)+360)%360;
-    setRot(rot+360*6+delta); setSpinning(true); sfx("riser");
+    setDur(secs);
+    setRot(rot+360*turns+delta); setSpinning(true); sfx("whoosh");
     later(function(){
       setSpinning(false); setLanded(true); sfx("land");
       var hit=WHEEL[i];
@@ -422,7 +438,7 @@ function Game(props){
           loadQuestion(hit.id,false);
         }
       },1500);
-    },5250);
+    },secs*1000+60);
   }
   function skip(){ setDrawer(false); nextTurn(); }
   function restart(){
@@ -553,7 +569,7 @@ function Game(props){
   } else if(m.phase==="reveal"){
     var rc=catOf(m.cat);
     middle=html`<${React.Fragment}>
-      <${Wheel} rot=${rot} spinning=${false} landed=${landed} disabled=${true} onSpin=${function(){}}/>
+      <${Wheel} rot=${rot} dur=${dur} spinning=${false} landed=${landed} disabled=${true} onSpin=${function(){}}/>
       <div class="cat-reveal" style=${catVars(m.cat)}>
         <${Tile} cat=${m.cat} on=${true}/>
         <span class="nm">${rc.short}<small>${subj(rc)}</small></span></div>
@@ -561,7 +577,7 @@ function Game(props){
   } else {
     /* the hub stays dead unless it really is this team's moment to spin: an overlay on top of
        it (unlock, crown) must not leave a live button underneath */
-    middle=html`<${Wheel} rot=${rot} spinning=${spinning} landed=${landed}
+    middle=html`<${Wheel} rot=${rot} dur=${dur} spinning=${spinning} landed=${landed}
       disabled=${m.paused||m.phase!=="spin"} onSpin=${spin}/>`;
   }
 
@@ -583,6 +599,7 @@ function Game(props){
       <span class="chip tnum">${team.score} ${T.pts}</span>
       <span class="chip tnum">${team.unlocked.length}/${CATS.length}</span>
     </div>
+    <${Standings} teams=${m.teams} turn=${m.turn}/>
     <div class="arena">
       <div class="center">${middle}</div>
       ${m.teams.map(function(tm,i){
@@ -592,6 +609,16 @@ function Game(props){
     </div>
 
     ${flash?html`<div class="goldflash" aria-hidden="true"></div>`:null}
+
+    ${turnCard&&m.phase==="spin"?html`<div class="turn-card" style=${{"--tc":team.color}} aria-hidden="true">
+      <div class="inner">
+        <span class="eyebrow">${T.turnOf}</span>
+        <span class="nm">${team.name}</span>
+        <span class="row" style=${{justifyContent:"center"}}>
+          <span class="chip tnum">${team.score} ${T.pts}</span>
+          <span class="chip tnum">${team.unlocked.length}/${CATS.length}</span>
+        </span>
+      </div></div>`:null}
 
     ${m.consult?html`<div class="overlay">
       <div class="sheet">

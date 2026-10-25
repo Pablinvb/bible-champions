@@ -133,7 +133,9 @@ function sfx(name){
   else if(name==="land"){ voice("sine",700,1050,t,0.14,0.12,6000); hiss(t,0.09,0.05,4000); }
   else if(name==="good"){ [784,988,1319].forEach(function(f,i){ voice("sine",f,f,t+i*0.065,0.26,0.1,6000); }); }
   else if(name==="bad"){  voice("sine",330,180,t,0.3,0.09,1400); }
-  else if(name==="riser"){ for(var i=0;i<18;i++) hiss(t+i*0.26,0.22,0.018+i*0.001,1200+i*260); }
+  /* the wheel: one breath of air as it goes, then a notch for every slot the pointer crosses */
+  else if(name==="whoosh"){ hiss(t,0.5,0.045,900); voice("sine",150,430,t,0.45,0.045,900); }
+  else if(name==="notch"){ voice("square",760,610,t,0.026,0.028,2200); }
   else if(name==="unlock"){ [659,880,1175,1568].forEach(function(f,i){ voice("sine",f,f,t+i*0.085,0.4,0.1,8000); }); }
   /* the crown gets a longer, brighter fanfare than anything else in the game */
   else if(name==="crown"){ [1047,1319,1568,2093,2637].forEach(function(f,i){ voice("sine",f,f,t+i*0.075,0.5,0.1,10000); });
@@ -418,6 +420,36 @@ function Toast(props){
 var SEG=360/WHEEL.length;
 function Wheel(props){
   var r=96, cx=100, cy=100, mr=61, rad=19;
+  var rotor=useRef(null), ptr=useRef(null);
+  /* The notches are read off the rotation the browser is actually painting rather than
+     scheduled in advance, so one sounds the instant the pointer crosses a slot edge however
+     the easing runs — and they thin out on their own as the wheel slows. */
+  useEffect(function(){
+    if(!props.spinning||calmMode()) return;
+    var el=rotor.current; if(!el) return;
+    var last=null, raf=0, heard=0;
+    (function frame(){
+      var tr=getComputedStyle(el).transform, deg=0;
+      var m=tr&&tr.indexOf("matrix(")===0?tr.slice(7,-1).split(","):null;
+      if(m) deg=Math.atan2(parseFloat(m[1]),parseFloat(m[0]))*180/Math.PI;
+      var idx=Math.floor((((deg%360)+360)%360)/SEG);
+      /* at full speed the edges go by faster than they can be heard apart, so the early
+         ones are thinned to a rattle rather than a machine gun */
+      var now=performance.now();
+      if(last!==null&&idx!==last&&now-heard>38){ sfx("notch"); heard=now; }
+      last=idx;
+      raf=requestAnimationFrame(frame);
+    })();
+    return function(){ cancelAnimationFrame(raf); };
+  },[props.spinning]);
+  /* a flick across the wheel throws it, the way a real one is thrown */
+  function down(e){ ptr.current={x:e.clientX,y:e.clientY,t:Date.now()}; }
+  function up(e){
+    var s=ptr.current; ptr.current=null;
+    if(!s||props.spinning||props.disabled) return;
+    var dx=e.clientX-s.x, dy=e.clientY-s.y;
+    if(Math.sqrt(dx*dx+dy*dy)>42&&Date.now()-s.t<700) props.onSpin();
+  }
   function pt(deg,rd){ var a=(deg-90)*Math.PI/180; return [cx+rd*Math.cos(a), cy+rd*Math.sin(a)]; }
   var clips=WHEEL.map(function(c,i){
     var mid=pt(i*SEG+SEG/2,mr);
@@ -437,10 +469,11 @@ function Wheel(props){
         fill="none" stroke="#fff" stroke-width="2"/>
     </g>`;
   });
-  return html`<div class="wheel-stage">
+  return html`<div class="wheel-stage" onPointerDown=${down} onPointerUp=${up}>
     <div class="wheel-glow"></div>
     <div class=${"pointer"+(props.landed?" hit":"")}></div>
-    <div class=${"wheel-rotor"+(props.spinning?" spin":"")} style=${{transform:"rotate("+props.rot+"deg)"}}>
+    <div class=${"wheel-rotor"+(props.spinning?" spin":"")} ref=${rotor}
+      style=${{transform:"rotate("+props.rot+"deg)",transitionDuration:(props.dur||5.2)+"s"}}>
       <svg viewBox="0 0 200 200" width="100%" height="100%" aria-hidden="true">
         <defs>${clips}</defs>
         <circle cx="100" cy="100" r="99" fill="rgba(255,255,255,.95)"/>
@@ -454,17 +487,53 @@ function Wheel(props){
 }
 
 /* ============================ team seat ============================ */
+/* A score that jumps is a number nobody watches, so it climbs instead. */
+function useCountUp(value){
+  var st=useState(value), shown=st[0], setShown=st[1];
+  var from=useRef(value);
+  useEffect(function(){
+    var a=from.current, b=value;
+    from.current=b;
+    if(a===b) return;
+    if(calmMode()){ setShown(b); return; }
+    var t0=performance.now(), dur=650, raf=0;
+    (function step(){
+      var p=Math.min(1,(performance.now()-t0)/dur);
+      setShown(Math.round(a+(b-a)*(1-Math.pow(1-p,3))));
+      if(p<1) raf=requestAnimationFrame(step);
+    })();
+    return function(){ cancelAnimationFrame(raf); setShown(b); };
+  },[value]);
+  return shown;
+}
 function TeamCard(props){
   var team=props.team, s=props.settings;
+  var shown=useCountUp(team.score);
+  var po=useState(null), pop=po[0], setPop=po[1];
+  var last=useRef(team.score);
+  /* what the team just won, floating off its own card */
+  useEffect(function(){
+    var d=team.score-last.current; last.current=team.score;
+    if(d<=0) return;
+    setPop({n:d,k:Date.now()});
+    var id=setTimeout(function(){ setPop(null); },1200);
+    return function(){ clearTimeout(id); };
+  },[team.score]);
+  var need=(s&&s.needed)||1;
   return html`<div class=${"team-card"+(props.active?" active":"")} style=${{"--tc":team.color}}>
+    ${pop?html`<span key=${pop.k} class="pop tnum">+${pop.n}</span>`:null}
     <div class="thead">
       <span class="tname">${team.name}</span>
-      <span class="score tnum">${team.score}</span>
+      <span class="score tnum">${shown}</span>
     </div>
     <div class="slots">
       ${CATS.map(function(c){
         var got=team.unlocked.indexOf(c.id)>=0;
-        return html`<${Tile} key=${c.id} cat=${c.id} on=${got} dim=${!got}/>`;
+        var p=got?need:Math.min(need,(team.progress&&team.progress[c.id])||0);
+        return html`<span key=${c.id} class="slot" style=${catVars(c.id)}>
+          <${Tile} cat=${c.id} on=${got} dim=${!got}/>
+          ${need>1?html`<i class="pbar"><b style=${{width:(p/need*100)+"%"}}></b></i>`:null}
+        </span>`;
       })}
     </div>
     <div class="meter">
@@ -477,5 +546,24 @@ function TeamCard(props){
       ${team.streak>=2?html`<span class="flame tnum" title=${T.streak}>🔥${team.streak}</span>`:null}
       <span class="tnum">${team.unlocked.length}/${CATS.length}</span>
     </div>
+  </div>`;
+}
+
+/* ============================ live standings ============================ */
+/* Four teams sit in the four corners, so the race itself is hard to read off the seats.
+   This strip puts them in order: champions first, points as the tie-break. */
+function Standings(props){
+  var order=props.teams.map(function(t,i){ return {t:t,i:i}; }).sort(function(a,b){
+    return (b.t.unlocked.length-a.t.unlocked.length)||(b.t.score-a.t.score)||(a.i-b.i);
+  });
+  return html`<div class="standings" aria-label=${T.rank}>
+    ${order.map(function(o,k){
+      return html`<span key=${o.t.id} class=${"rchip"+(o.i===props.turn?" live":"")} style=${{"--tc":o.t.color}}>
+        <b class="pos tnum">${k+1}</b>
+        <span class="nm">${o.t.name}</span>
+        <span class="tnum">${o.t.unlocked.length}/${CATS.length}</span>
+        <span class="tnum sc">${o.t.score}</span>
+      </span>`;
+    })}
   </div>`;
 }
