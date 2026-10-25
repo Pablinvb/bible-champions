@@ -29,7 +29,7 @@ const FRAGMENTS = [
   src("questions", "14-sports.js"),
   src("questions", "15-economics.js"),
   src("questions", "16-riddles.js"),
-  src("questions", "19-review.js"),
+  src("questions", "17-doctrine.js"),
   src("03-engine.js"),     // closes SEED], audio, confetti, bank helpers, wheel, team card
   src("04-game.js"),       // host panel and the match itself
   src("05-screens.js"),    // home, how to play, setup, settings, question bank, app shell, boot

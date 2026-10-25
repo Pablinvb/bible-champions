@@ -81,21 +81,31 @@ cannot be undone asks for confirmation first.
 
 ## The question bank
 
-147 questions ship with the game: **140 verified**, 20 per subject, balanced across easy, medium
-and hard, in **Spanish and English** — every question carries both languages, its scripture
-citation and a short explanation, so switching language never shrinks the bank.
+146 verified questions ship with the game, in **Spanish and English** — every question carries
+both languages, its scripture citation and a short explanation, so switching language never
+shrinks the bank. 140 of them are the subject bank, 20 each, balanced across easy, medium and
+hard. The other six sit in `src/questions/17-doctrine.js`.
 
-The remaining **7 are marked "needs review"**. They touch doctrinal or chronological points
-rather than a plain reading of a verse, and they ship switched off: a match set to
-*Only verified questions* (the default) never draws them. Check each one against jw.org or the
-Watchtower ONLINE LIBRARY and tick it as verified in the bank editor before using it.
+Those six are kept apart on purpose. They answer points of doctrine and chronology — the year
+the Kingdom was established, the year Jerusalem fell, where the faithful will live, competitive
+sport, how the work is financed, what the soul is — so they do not come from a plain reading of
+a single verse the way the rest do. Each one was checked against its own page on jw.org before
+being switched on. **If the published explanation ever changes, that is the file to review
+first.** Any question can be put back under review by setting `verified:false` on its row, or by
+switching it to *Needs review* in the bank editor; a match set to *Only verified questions* —
+the default — then never draws it.
 
 ### Sources
 
-Wording and spelling were checked against the *New World Translation of the Holy Scriptures*
-(2019 Spanish revision) on [jw.org](https://www.jw.org). Where the Spanish edition differs from
-other translations the game follows jw.org: *Apocalipsis* (not Revelación), *Armagedón*,
-*Boaz*, *Asahel*, *Ahimáaz*, *adivinanza* for Samson's riddle.
+Wording, spelling and answers were checked against [jw.org](https://www.jw.org): the
+*New World Translation of the Holy Scriptures* (2019 Spanish revision) for the verses, and the
+site's own pages for the six on doctrine and chronology — *¿Qué indica la cronología bíblica
+sobre el año 1914?*, *¿Será destruida la Tierra?*, *¿Qué es el alma?* and *¿Cómo se financia la
+obra de los testigos de Jehová?*
+
+Where the Spanish edition differs from other translations the game follows jw.org:
+*Apocalipsis* (not Revelación), *Armagedón*, *Boaz*, *Asahel*, *Ahimáaz*, and *adivinanza* for
+Samson's riddle.
 
 ### Editing
 
@@ -143,7 +153,7 @@ answer are dropped silently, so check the count the toast reports.
 |---|---|
 | `src/01-styles.html` | `<title>`, Google Fonts, the whole stylesheet including the colour tokens |
 | `src/02-config.js` | the cast, scoring, lifelines, every player-facing string in both languages; opens `var SEED=[` |
-| `src/questions/*.js` | question rows, one file per subject plus the review file. Pure data |
+| `src/questions/*.js` | question rows, one file per subject plus `17-doctrine.js`. Pure data |
 | `src/03-engine.js` | closes `SEED]`, then storage, audio, confetti, starfield, bank filtering, CSV/JSON import-export, the wheel, the team card |
 | `src/04-game.js` | host panel and the match: turns, timer, answering, Crown, lifelines, victory |
 | `src/05-screens.js` | home, how to play, setup, settings, question bank editor, app shell, React boot |

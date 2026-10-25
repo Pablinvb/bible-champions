@@ -188,13 +188,12 @@ function subj(c){ return (c&&c.subject&&(c.subject[LANG]||c.subject.en))||""; }
      EN[question, A, B, C, D, explanation, scripture],
      ES[question, A, B, C, D, explanation, scripture])
    The answer index is the same in both languages, so the two option lists must stay in step.
-   `verified:true` means the wording was checked against the Bible text it cites. */
+   `verified:true` means the wording was checked against the Bible text it cites. A question
+   that still needs checking gets `verified:false`, and a match set to "only verified
+   questions" — the default — never draws it. */
 function B(cat,dif,a,en,es){
   return {cat:cat,dif:dif,a:a,verified:true,
     en:{q:en[0],o:[en[1],en[2],en[3],en[4]],e:en[5],ref:en[6]||""},
     es:{q:es[0],o:[es[1],es[2],es[3],es[4]],e:es[5],ref:es[6]||""}};
 }
-/* R() is the same row marked as needing review: doctrinal or interpretive wording that the
-   host should check against the publications before it is used in a match. */
-function R(cat,dif,a,en,es){ var q=B(cat,dif,a,en,es); q.verified=false; return q; }
 var SEED=[

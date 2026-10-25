@@ -602,15 +602,14 @@ function subj(c){ return (c&&c.subject&&(c.subject[LANG]||c.subject.en))||""; }
      EN[question, A, B, C, D, explanation, scripture],
      ES[question, A, B, C, D, explanation, scripture])
    The answer index is the same in both languages, so the two option lists must stay in step.
-   `verified:true` means the wording was checked against the Bible text it cites. */
+   `verified:true` means the wording was checked against the Bible text it cites. A question
+   that still needs checking gets `verified:false`, and a match set to "only verified
+   questions" — the default — never draws it. */
 function B(cat,dif,a,en,es){
   return {cat:cat,dif:dif,a:a,verified:true,
     en:{q:en[0],o:[en[1],en[2],en[3],en[4]],e:en[5],ref:en[6]||""},
     es:{q:es[0],o:[es[1],es[2],es[3],es[4]],e:es[5],ref:es[6]||""}};
 }
-/* R() is the same row marked as needing review: doctrinal or interpretive wording that the
-   host should check against the publications before it is used in a match. */
-function R(cat,dif,a,en,es){ var q=B(cat,dif,a,en,es); q.verified=false; return q; }
 var SEED=[
 // ---------- BIBLE PROPHECIES · Ezra, the Vision Keeper ----------
 B("prophecy","easy",1,
@@ -1039,31 +1038,29 @@ B("riddles","hard",1,
 B("riddles","hard",2,
  ["How many baskets of leftovers were gathered after feeding the 5,000 men?","Five","Seven","Twelve","Twenty","They took up twelve baskets full of the leftover fragments.","Matthew 14:20"],
  ["¿Cuántas cestas de sobras se recogieron después de alimentar a 5.000 hombres?","Cinco","Siete","Doce","Veinte","Recogieron doce cestas llenas de los pedazos que sobraron.","Mateo 14:20"]),
-// ---------- PENDING REVIEW ----------
-// These seven touch doctrinal or chronological points rather than a plain reading of a verse.
-// They ship switched off (verified:false): the host should check each one against jw.org or the
-// Watchtower ONLINE LIBRARY and tick it as verified in the question bank before using it.
-R("prophecy","medium",2,
- ["According to the teaching of Jehovah's Witnesses, which year marks the establishment of God's Kingdom in heaven?","1874","1878","1914","1975","Check this answer against the current publications before using the question.","Daniel 4:16,17"],
- ["Según las enseñanzas de los testigos de Jehová, ¿qué año marca el establecimiento del Reino de Dios en el cielo?","1874","1878","1914","1975","Verifique esta respuesta en las publicaciones actuales antes de usar la pregunta.","Daniel 4:16, 17"]),
-R("history","hard",1,
- ["According to the chronology used by Jehovah's Witnesses, in which year was Jerusalem destroyed by Babylon?","586 B.C.E.","607 B.C.E.","539 B.C.E.","70 C.E.","Check this date against the current publications before using the question.","Jeremiah 25:11"],
- ["Según la cronología que usan los testigos de Jehová, ¿en qué año destruyó Babilonia a Jerusalén?","586 a. e. c.","607 a. e. c.","539 a. e. c.","70 e. c.","Verifique esta fecha en las publicaciones actuales antes de usar la pregunta.","Jeremías 25:11"]),
-R("geography","easy",1,
- ["Where does the Bible say that most faithful people will live forever?","Only in heaven","On the earth","On another planet","Nowhere","The righteous will possess the earth and live forever on it.","Psalm 37:29"],
- ["¿Dónde dice la Biblia que vivirá para siempre la mayoría de las personas fieles?","Solo en el cielo","En la Tierra","En otro planeta","En ningún lugar","Los justos poseerán la tierra y vivirán para siempre en ella.","Salmo 37:29"]),
-R("art","medium",2,
- ["Why do Jehovah's Witnesses not use the cross as a religious symbol?","Because it is too old","Because it is hard to draw","Because they understand that Jesus died on a stake and that images are not used in worship","Because it is expensive","Check the explanation in the publications before using the question.","Acts 5:30"],
- ["¿Por qué los testigos de Jehová no usan la cruz como símbolo religioso?","Porque es muy antigua","Porque es difícil de dibujar","Porque entienden que Jesús murió en un madero y que no se usan imágenes en la adoración","Porque es cara","Verifique la explicación en las publicaciones antes de usar la pregunta.","Hechos 5:30"]),
-R("sports","medium",0,
- ["Which Bible principle guides a Christian's view of competitive sport?","Not to stir up competition with one another","To win at any cost","To avoid all exercise","To compete only on the sabbath","Paul urged Christians not to become egotistical, stirring up competition with one another.","Galatians 5:26"],
- ["¿Qué principio bíblico guía la actitud cristiana hacia el deporte competitivo?","No fomentar la competencia unos con otros","Ganar a cualquier precio","Evitar todo ejercicio","Competir solo en sábado","Pablo animó a los cristianos a no hacerse egotistas, fomentando la competencia unos con otros.","Gálatas 5:26"]),
-R("economics","easy",1,
- ["How is the work of Jehovah's Witnesses financed?","With obligatory tithes","With voluntary donations","With collections during the meetings","With a membership fee","Each one does as he has resolved in his heart, for God loves a cheerful giver.","2 Corinthians 9:7"],
- ["¿Cómo se financia la obra de los testigos de Jehová?","Con diezmos obligatorios","Con donaciones voluntarias","Con colectas durante las reuniones","Con una cuota de socio","Cada uno hace como ha resuelto en su corazón, porque Dios ama al que da con alegría.","2 Corintios 9:7"]),
-R("riddles","medium",0,
- ["According to the Bible, what is a human soul?","The person himself","An invisible part that survives death","A guardian angel","A kind of energy","Genesis says that the man came to be a living soul, that is, a living person.","Genesis 2:7"],
- ["Según la Biblia, ¿qué es el alma humana?","La persona misma","Una parte invisible que sobrevive a la muerte","Un ángel guardián","Una clase de energía","Génesis dice que el hombre llegó a ser un alma viviente, es decir, una persona viviente.","Génesis 2:7"]),
+// ---------- DOCTRINE AND CHRONOLOGY ----------
+// These six were checked against jw.org on 25 October 2026 — each one has an official page or
+// rests on a verse quoted from the 2019 Spanish revision of the New World Translation. They are
+// kept together because they do not come from a plain reading of a single verse: if the
+// published explanation ever changes, this is the file to review first.
+B("prophecy","medium",2,
+ ["According to Bible chronology, which year marks the establishment of God's Kingdom in heaven?","1874","1878","1914","1975","The seven times of Daniel chapter 4 run out in 1914, the year God's Kingdom was established in the heavens.","Daniel 4:16,17"],
+ ["Según la cronología bíblica, ¿qué año marca el establecimiento del Reino de Dios en el cielo?","1874","1878","1914","1975","Los siete tiempos de Daniel capítulo 4 terminan en 1914, el año en que el Reino de Dios fue establecido en los cielos.","Daniel 4:16, 17"]),
+B("history","hard",1,
+ ["According to Bible chronology, in which year did Babylon destroy Jerusalem?","586 B.C.E.","607 B.C.E.","539 B.C.E.","70 C.E.","Nebuchadnezzar's army burned the city and its temple in October of 607 B.C.E., when the seven times began.","2 Kings 25:8-10"],
+ ["Según la cronología bíblica, ¿en qué año destruyó Babilonia a Jerusalén?","586 a. e. c.","607 a. e. c.","539 a. e. c.","70 e. c.","El ejército de Nabucodonosor quemó la ciudad y su templo en octubre del 607 a. e. c., cuando empezaron los siete tiempos.","2 Reyes 25:8-10"]),
+B("geography","easy",1,
+ ["Where does the Bible say that faithful people will live forever?","Only in heaven","On the earth","On another planet","Nowhere","The earth will never be destroyed: the righteous will possess it and live forever on it.","Psalm 37:29"],
+ ["¿Dónde dice la Biblia que vivirán para siempre las personas fieles?","Solo en el cielo","En la Tierra","En otro planeta","En ningún lugar","La Tierra nunca será destruida: los justos la poseerán y residirán para siempre sobre ella.","Salmo 37:29"]),
+B("sports","medium",0,
+ ["Which Bible principle guides a Christian's view of competitive sport?","Not to stir up competition with one another","To win at any cost","To avoid all exercise","To compete only on the sabbath","Paul wrote: Let us not become egotistical, stirring up competition with one another, envying one another.","Galatians 5:26"],
+ ["¿Qué principio bíblico guía la actitud cristiana hacia el deporte competitivo?","No fomentar competencias entre unos y otros","Ganar a cualquier precio","Evitar todo ejercicio","Competir solo en sábado","Pablo escribió: No nos volvamos egocéntricos, fomentando competencias entre unos y otros y envidiándonos unos a otros.","Gálatas 5:26"]),
+B("economics","easy",1,
+ ["How is the worldwide work of Jehovah's Witnesses financed?","With obligatory tithes","With voluntary donations","With collections during the meetings","With a membership fee","No tithe is paid and no collection is taken: each one gives what he has decided in his heart, for God loves a cheerful giver.","2 Corinthians 9:7"],
+ ["¿Cómo se financia la obra mundial de los testigos de Jehová?","Con diezmos obligatorios","Con donaciones voluntarias","Con colectas durante las reuniones","Con una cuota de socio","No se paga diezmo ni se hacen colectas: cada uno hace lo que ha decidido en su corazón, porque Dios ama al que da con alegría.","2 Corintios 9:7"]),
+B("riddles","medium",0,
+ ["According to the Bible, what is a human soul?","The person himself","An invisible part that survives death","A guardian angel","A kind of energy","Adam did not receive a soul: the man came to be a living soul, that is, a living person.","Genesis 2:7"],
+ ["Según la Biblia, ¿qué es el alma humana?","La persona misma","Una parte invisible que sobrevive a la muerte","Un ángel guardián","Una clase de energía","Adán no recibió un alma: el hombre llegó a ser alma viviente, es decir, una persona viviente.","Génesis 2:7"]),
 ];
 SEED.forEach(function(q,i){ q.id="BIB-"+String(i+1).padStart(3,"0"); });
 
