@@ -90,18 +90,24 @@ function Drawer(props){
     <h3>${T.lifelines}</h3>
     ${m.teams.map(function(tm,i){ return html`<div key=${tm.id} class="row between" style=${{marginBottom:"8px"}}>
       <b style=${{fontSize:"13.5px"}}>${tm.name}</b>
-      <span class="row" style=${{gap:"6px"}}>
+      <span class="row" style=${{gap:"5px"}}>
         ${LIFELINES.map(function(l){
-          var left=!!(tm.lifelines&&tm.lifelines[l.id]);
-          return html`<button key=${l.id} class=${"btn sm"+(left?" ghost":"")}
-            title=${llName(l.id)+" — "+(left?T.llUsed:T.llGiveBack)}
+          /* one tap hands this team another one; the arrow puts the whole set back to one each */
+          var n=llCount(tm,l.id);
+          return html`<button key=${l.id} class=${"btn sm"+(n?"":" ghost")} style=${{padding:"7px 9px",gap:"5px"}}
+            title=${llName(l.id)+" ×"+n+" — "+T.llGiveBack}
             onClick=${function(){ sfx("click"); setM(function(p){
               var ts=clone(p.teams);
-              if(!ts[i].lifelines) ts[i].lifelines=freshLifelines();
-              ts[i].lifelines[l.id]=!ts[i].lifelines[l.id];
+              migrateLifelines(ts[i]);
+              ts[i].lifelines[l.id]=Math.min(LL_CAP,llCount(ts[i],l.id)+1);
               return Object.assign({},p,{teams:ts});
-            }); }}><${LLIcon} id=${l.id} size=${15}/></button>`;
+            }); }}><${LLIcon} id=${l.id} size=${15}/><span class="tnum">${n}</span></button>`;
         })}
+        <button class="btn sm ghost" style=${{padding:"7px 10px"}} title=${T.llReset}
+          onClick=${function(){ sfx("click"); setM(function(p){
+            var ts=clone(p.teams); ts[i].lifelines=freshLifelines();
+            return Object.assign({},p,{teams:ts});
+          }); }}>↺</button>
       </span></div>`; })}
 
     <h3>${T.setup}</h3>
@@ -114,6 +120,12 @@ function Drawer(props){
     <div class="field" style=${{marginTop:"12px"}}><span class="label">${T.difficulty}</span>
       <${Seg} value=${s.difficulty} onChange=${function(v){patchSettings("difficulty",v);}}
         items=${[{v:"easy",l:T.easy},{v:"medium",l:T.medium},{v:"hard",l:T.hard},{v:"mixed",l:T.mixed}]}/></div>
+    <div class="field" style=${{marginTop:"12px"}}><span class="label">${T.chain}</span>
+      <${Seg} value=${s.chain||1} onChange=${function(v){patchSettings("chain",v);}}
+        items=${[{v:1,l:T.chainOff},{v:2,l:"2"},{v:3,l:"3"},{v:5,l:"5"}]}/></div>
+    <div class="field" style=${{marginTop:"12px"}}><span class="label">${T.earn}</span>
+      <${Seg} value=${s.earn!==false} onChange=${function(v){patchSettings("earn",v);}}
+        items=${[{v:true,l:T.on},{v:false,l:T.off}]}/></div>
     <div class="field" style=${{marginTop:"12px"}}><span class="label">${T.language}</span>
       <${Seg} value=${s.language} onChange=${function(v){patchSettings("language",v);}}
         items=${LANGS.map(function(l){return {v:l.id,l:l.name};})}/></div>
@@ -235,15 +247,20 @@ function Game(props){
     return function(){ window.removeEventListener("keydown",onKey); };
   },[m,rot,spinning]);
 
-  /* One place decides what an answer is worth: points by difficulty, the crown bonus, the
-     unlock bonus, and whether this answer completes a champion. */
+  /* One place decides what an answer is worth: points by difficulty, the streak bonus, the
+     crown bonus, the unlock bonus, whether this answer completes a champion, whether it earns
+     a lifeline, and whether the team keeps the wheel. */
   function resolveAnswer(p,pick){
     var q=p.q, ok=(pick!==null&&pick===q.a);
     var teams=clone(p.teams), tm=teams[p.turn];
-    var gained=0, unlock=null, crownMissed=false;
+    var gained=0, unlock=null, crownMissed=false, bonus=0, got=null;
     if(ok){
       gained=POINTS[q.dif]||100;
       tm.correct++;
+      tm.streak=(tm.streak||0)+1;
+      if(tm.streak>(tm.best||0)) tm.best=tm.streak;
+      bonus=streakBonus(tm.streak);
+      gained+=bonus;
       if(q.crown){ gained+=CROWN_BONUS; tm.crownWins=(tm.crownWins||0)+1; }
       if(tm.unlocked.indexOf(q.cat)<0){
         if(q.crown){
@@ -256,17 +273,31 @@ function Game(props){
         if(unlock) gained+=UNLOCK_BONUS;
       }
       tm.score+=gained;
+      /* a prize for the streak, and one for the crown — never two from the same answer */
+      if(p.settings.earn){
+        if(tm.streak%STREAK_STEP===0) got=grantLifeline(tm);
+        else if(q.crown) got=grantLifeline(tm);
+      }
     } else {
       tm.wrong++;
+      tm.streak=0;
       if(q.crown) crownMissed=true;
     }
     var log=p.log.slice(0,59);
     log.unshift({team:tm.name,cat:q.cat,ok:ok,timeout:pick===null,crown:!!q.crown,q:q.q});
     return Object.assign({},p,{phase:"feedback",teams:teams,pick:pick,ok:ok,gained:gained,
-      pendingUnlock:unlock,crownMissed:crownMissed,log:log,consult:null});
+      streakBonus:bonus,gotLL:got,again:ok&&(p.chain||1)<(p.settings.chain||1),
+      pendingUnlock:unlock,crownMissed:crownMissed,log:log,consult:null,second:false});
   }
   function answer(pick){
     if(m.phase!=="question") return;
+    /* a second chance swallows the first wrong answer: that option is struck out and the
+       team carries on against the same clock */
+    if(pick!==null&&pick!==m.q.a&&m.second){
+      sfx("bad");
+      setM(function(p){ return Object.assign({},p,{second:false,strike:pick}); });
+      return;
+    }
     var next=resolveAnswer(m,pick);
     sfx(next.ok?"good":"bad");
     setM(next);
@@ -275,7 +306,7 @@ function Game(props){
     sfx("click");
     if(m.pendingUnlock){ sfx("unlock"); confetti(3000); setM(Object.assign({},m,{phase:"unlock"})); return; }
     setM(Object.assign({},m,{crownMissed:false}));
-    later(nextTurn,10);
+    later(m.again?sameTeam:nextTurn,10);
   }
   function collect(){
     sfx("click");
@@ -286,35 +317,62 @@ function Game(props){
       return;
     }
     setM(next);
-    later(nextTurn,10);
+    later(m.again?sameTeam:nextTurn,10);
   }
-  /* each lifeline is good once per team for the whole match */
+  /* A lifeline is spent from the team's own stock. Five of them, and each one changes the
+     question in a different way: more time, a pause to consult, fewer wrong options, a second
+     attempt, or a different question from the same subject. */
+  function llOff(l){
+    return llCount(team,l.id)<1||!!m.consult
+      ||(l.mode==="fifty"&&!!m.hidden)
+      ||(l.mode==="second"&&!!m.second);
+  }
   function useLifeline(id){
     if(m.phase!=="question"||m.paused||m.consult) return;
-    var tm=m.teams[m.turn];
-    if(!tm.lifelines||!tm.lifelines[id]) return;
-    var spec=LIFELINES.filter(function(l){ return l.id===id; })[0];
-    if(!spec) return;
-    sfx("unlock");
+    var spec=llSpec(id);
+    if(!spec||llOff(spec)) return;
+    sfx(spec.mode==="fifty"?"land":"unlock");
     setM(function(p){
-      var teams=clone(p.teams);
-      teams[p.turn].lifelines[id]=false;
-      if(spec.mode==="extend"){
+      var teams=clone(p.teams), tm=teams[p.turn];
+      var left=llCount(tm,id)-1;
+      if(left<0) return p;
+      tm.lifelines[id]=left;
+      if(spec.mode==="extend")
         return Object.assign({},p,{teams:teams,
           timeLeft:p.timeLeft+spec.secs,
           timeMax:(p.timeMax||p.settings.timer)+spec.secs});
+      if(spec.mode==="consult")
+        return Object.assign({},p,{teams:teams,consult:{left:spec.secs,total:spec.secs}});
+      if(spec.mode==="second")
+        return Object.assign({},p,{teams:teams,second:true});
+      if(spec.mode==="fifty"){
+        /* clear away the wrong options but always leave one standing beside the answer, so a
+           bomb after a second chance is still a choice and not a free point */
+        var wrongs=[0,1,2,3].filter(function(i){ return i!==p.q.a&&i!==p.strike; });
+        return Object.assign({},p,{teams:teams,hidden:shuffle(wrongs).slice(0,Math.max(0,wrongs.length-1))});
       }
-      return Object.assign({},p,{teams:teams,consult:{left:spec.secs,total:spec.secs}});
+      /* swap: a new question from the same subject, on a fresh clock */
+      var d=drawQuestion(p,p.q.cat,!!p.q.crown);
+      if(!d) return p;
+      return Object.assign({},p,{teams:teams,q:d.q,used:d.used,recycled:d.recycled,
+        timeLeft:p.settings.timer,timeMax:p.settings.timer,
+        pick:null,ok:null,hidden:null,second:false,strike:null});
     });
   }
   function toPick(){ sfx("click"); setM(function(p){ return Object.assign({},p,{phase:"crownPick"}); }); }
-  function nextTurn(){
-    setLanded(false);
-    setM(function(p){ return Object.assign({},p,{phase:"spin",turn:(p.turn+1)%p.teams.length,
-      q:null,cat:null,pick:null,ok:null,gained:0,pendingUnlock:null,
-      crownMissed:false,fromWheel:false,timeLeft:p.settings.timer,timeMax:p.settings.timer,
-      consult:null,recycled:false}); });
+  /* A turn ends the same way whether the team keeps the wheel after a correct answer or
+     hands it on; only the seat and the spin counter differ. */
+  function freshTurn(p,same){
+    return Object.assign({},p,{phase:"spin",
+      turn:same?p.turn:(p.turn+1)%p.teams.length,
+      chain:same?(p.chain||1)+1:1,
+      q:null,cat:null,pick:null,ok:null,gained:0,streakBonus:0,gotLL:null,again:false,
+      pendingUnlock:null,crownMissed:false,fromWheel:false,
+      timeLeft:p.settings.timer,timeMax:p.settings.timer,
+      consult:null,recycled:false,hidden:null,second:false,strike:null});
   }
+  function nextTurn(){ setLanded(false); setM(function(p){ return freshTurn(p,false); }); }
+  function sameTeam(){ setLanded(false); setM(function(p){ return freshTurn(p,true); }); }
   function drawQuestion(p,catId,isCrown){
     var pool=poolFor(bank,p.settings).filter(function(q){ return q.cat===catId; });
     if(!pool.length) return null;
@@ -337,7 +395,8 @@ function Game(props){
       if(!d) return Object.assign({},p,{phase:isCrown?"crownPick":"spin",noPool:true});
       return Object.assign({},p,{phase:"question",q:d.q,used:d.used,
         timeLeft:p.settings.timer,timeMax:p.settings.timer,consult:null,
-        pick:null,ok:null,recycled:d.recycled,noPool:false});
+        pick:null,ok:null,recycled:d.recycled,noPool:false,
+        hidden:null,second:false,strike:null});
     });
   }
   useEffect(function(){ if(m.noPool){ setToast(T.noQuestions); setM(function(p){return Object.assign({},p,{noPool:false});}); } },[m.noPool]);
@@ -371,9 +430,10 @@ function Game(props){
     setM(function(p){
       var ts=p.teams.map(function(tm){ var n=clone(tm);
         n.score=0; n.correct=0; n.wrong=0; n.unlocked=[]; n.progress={}; n.crownWins=0;
-        n.lifelines=freshLifelines(); return n; });
-      return Object.assign({},p,{teams:ts,turn:0,used:{},log:[],phase:"spin",q:null,cat:null,
-        pick:null,ok:null,gained:0,pendingUnlock:null,crownMissed:false,
+        n.streak=0; n.best=0; n.lifelines=freshLifelines(); return n; });
+      return Object.assign({},p,{teams:ts,turn:0,chain:1,used:{},log:[],phase:"spin",q:null,cat:null,
+        pick:null,ok:null,gained:0,streakBonus:0,gotLL:null,again:false,
+        pendingUnlock:null,crownMissed:false,hidden:null,second:false,strike:null,
         fromWheel:false,winner:null,paused:false,timeLeft:p.settings.timer,timeMax:p.settings.timer});
     });
   }
@@ -392,7 +452,8 @@ function Game(props){
         <div class="eyebrow" style=${{marginBottom:"12px"}}>${T.summary}</div>
         <table><thead><tr>
           <th>${T.team}</th><th>${T.characters}</th><th>${T.crowns}</th>
-          <th>${T.hits}</th><th>${T.misses}</th><th style=${{textAlign:"right"}}>${T.score}</th>
+          <th>${T.hits}</th><th>${T.misses}</th><th>${T.bestStreak}</th>
+          <th style=${{textAlign:"right"}}>${T.score}</th>
         </tr></thead><tbody>
         ${ranked.map(function(tm){ return html`<tr key=${tm.id}>
           <td><span style=${{display:"inline-block",width:"9px",height:"9px",borderRadius:"50%",
@@ -400,6 +461,7 @@ function Game(props){
           <td class="tnum">${tm.unlocked.length}/${CATS.length}</td>
           <td class="tnum">${tm.crownWins||0}</td>
           <td class="tnum">${tm.correct}</td><td class="tnum">${tm.wrong}</td>
+          <td class="tnum">${tm.best||0}</td>
           <td class="num">${tm.score}</td>
         </tr>`; })}
         </tbody></table>
@@ -432,28 +494,33 @@ function Game(props){
       <h2 class="qtext">${q.q}</h2>
       <div class="opts">
         ${q.o.map(function(txt,i){
+          var gone=!!(m.hidden&&m.hidden.indexOf(i)>=0), struck=(m.strike===i);
           var cls="opt";
+          if(gone) cls+=" gone";
+          if(struck&&!done) cls+=" struck";
           if(done){ cls+= i===q.a?" correct":(i===m.pick?" wrong":" dim"); }
-          return html`<button key=${i} class=${cls} disabled=${done||m.paused}
+          return html`<button key=${i} class=${cls} disabled=${done||m.paused||gone||struck}
             onClick=${function(){ answer(i); }}>
             <span class="key">${"ABCD".charAt(i)}</span><span>${txt}</span></button>`;
         })}
       </div>
       ${!done?html`<div class="lifelines">
         ${LIFELINES.map(function(l){
-          var left=!!(team.lifelines&&team.lifelines[l.id]);
-          return html`<button key=${l.id} class="ll" disabled=${!left||!!m.consult}
+          var n=llCount(team,l.id), armed=(l.mode==="second"&&m.second);
+          return html`<button key=${l.id} class=${"ll"+(armed?" armed":"")} disabled=${llOff(l)}
             title=${llHint(l.id)} onClick=${function(){ useLifeline(l.id); }}>
             <${LLIcon} id=${l.id}/>
             <span class="nm">${llName(l.id)}</span>
-            <span class="secs">${left?"+"+l.secs+"s":T.llUsed}</span></button>`;
+            <span class="secs">${armed?T.llArmed:(n?"×"+n:T.llUsed)}</span></button>`;
         })}
-        <span class="hint">${T.llOnce}</span>
       </div>`:null}
       ${done?html`<div class=${"verdict "+(m.ok?"ok":"no")}>
           <span class="big">${m.ok?T.correct:(m.pick===null?T.timeup:T.incorrect)}</span>
           ${m.ok?html`<span class="chip tnum">+${m.gained} ${T.pts}</span>`:null}
+          ${m.streakBonus?html`<span class="chip flame tnum">🔥 ${team.streak} · +${m.streakBonus}</span>`:null}
+          ${m.gotLL?html`<span class="chip gold">${T.llEarned}: ${llName(m.gotLL)}</span>`:null}
           ${m.crownMissed?html`<span class="chip">${T.crownMissed}</span>`:null}
+          ${m.again?html`<span class="chip">${T.keepPlaying}</span>`:null}
         </div>
         <div class="explain">
           ${q.ref?html`<span class="tag ref scripture">${q.ref}</span><br/>`:null}
@@ -462,7 +529,7 @@ function Game(props){
           ${m.ok&&!m.pendingUnlock&&!q.crown&&team.unlocked.indexOf(q.cat)>=0
             ?html`<div style=${{marginTop:"7px",fontSize:"13.5px"}}>${T.already}</div>`:null}
         </div>
-        <button class="btn block" onClick=${cont}>${m.pendingUnlock?T.collect:T.next}</button>`:null}
+        <button class="btn block" onClick=${cont}>${m.pendingUnlock?T.collect:(m.again?T.keepTurn:T.next)}</button>`:null}
     </div>`;
   } else if(m.phase==="crownPick"){
     var mine=m.teams[m.turn];
@@ -510,7 +577,9 @@ function Game(props){
     <div class="turn-bar" style=${{"--tc":team.color}}>
       <span class="eyebrow">${T.turn}</span>
       <span class="who">${team.name}</span>
+      ${s.chain>1?html`<span class="chip tnum">${T.spinOf} ${m.chain||1}/${s.chain}</span>`:null}
       <span class="spacer"></span>
+      ${team.streak>=2?html`<span class="chip flame tnum">🔥 ${team.streak}</span>`:null}
       <span class="chip tnum">${team.score} ${T.pts}</span>
       <span class="chip tnum">${team.unlocked.length}/${CATS.length}</span>
     </div>

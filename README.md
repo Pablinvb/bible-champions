@@ -53,8 +53,12 @@ commit, and push: GitHub Pages serves the repository root.
 
 ## How a match runs
 
-- Each team spins once per turn. The wheel picks the subject.
+- The wheel picks the subject. **A correct answer keeps the turn** — the team spins again, up to
+  the number of spins in a row set at setup (3 by default; set it to 1 to turn chaining off).
+  The turn only passes when a team misses.
 - A correct answer scores by difficulty: **easy 100 · medium 200 · hard 300**.
+- Answers in a row pay a **streak bonus**: +50 for two, +100 for three, +150 from four on. A
+  wrong answer puts the streak back to zero.
 - Enough correct answers in one subject (1, 2 or 3 — your choice at setup) win that champion,
   worth **+150**.
 - Landing on **Crown** opens the crown challenge: the team picks any champion it is *missing*
@@ -65,17 +69,31 @@ commit, and push: GitHub Pages serves the repository root.
   duplicated.
 - The first team holding all seven champions wins, and the match stops there.
 
-Two lifelines, one use of each per team per match: **Scroll** (+30 seconds) and
-**Ask a team** (15 seconds to consult another team, with the question clock paused).
+### Lifelines
+
+Five of them. Every team starts with one of each and never holds more than three of the same one.
+
+| Lifeline | What it does |
+|---|---|
+| **Scroll** | +30 seconds to look it up in the Bible |
+| **Ask a team** | 15 seconds to consult another team, with the question clock paused |
+| **Bomb** | Clears the wrong options until only one is left beside the answer |
+| **Second chance** | Absorbs the first wrong answer: that option is struck out and the team tries again on the same clock |
+| **Skip** | A different question from the same subject, on a fresh clock |
+
+With **Earn lifelines** on (the default), a team is given one more — picked at random from the
+ones it is not full on — for every three correct answers in a row and for every crown challenge
+won. Turn it off at setup for a strictly one-of-each match.
 
 Keyboard: `space` spins and advances, `A`–`D` or `1`–`4` answer, the gear opens the host panel.
 
 ## Host panel
 
 The gear in the top bar opens it mid-match: pause and resume, skip a question, change the active
-team, correct a score, grant or remove a champion, return a spent lifeline, change the timer,
-difficulty, language or unlock requirement, read the answer log, restart or exit. Anything that
-cannot be undone asks for confirmation first.
+team, correct a score, grant or remove a champion, hand a team another lifeline (or ↺ to put its
+whole set back to one each), change the timer, difficulty, language, unlock requirement, spins in
+a row or lifeline earning, read the answer log, restart or exit. Anything that cannot be undone
+asks for confirmation first.
 
 ---
 

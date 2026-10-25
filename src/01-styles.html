@@ -221,10 +221,12 @@ select option{background:#1b1047;color:#fff}
 .slots .ctile{box-shadow:0 0 0 2px rgba(255,255,255,.5)}
 .slots .ctile.on{box-shadow:0 0 0 2px var(--cc),0 0 12px color-mix(in srgb,var(--cc) 60%,transparent)}
 .meter{display:flex;align-items:center;gap:7px;margin-top:9px;font-size:11.5px;font-weight:800;color:var(--ink-3)}
-.ll-mini{display:flex;gap:4px}
-.ll-mini span{display:inline-grid;place-items:center;width:21px;height:21px;border-radius:7px;
+.ll-mini{display:flex;gap:3px}
+.ll-mini span{display:inline-flex;align-items:center;gap:1px;justify-content:center;
+  min-width:19px;height:19px;padding:0 3px;border-radius:6px;
   background:rgba(255,255,255,.14);color:var(--ink-2)}
 .ll-mini span.spent{opacity:.25}
+.ll-mini b{font-size:10px;line-height:1;color:var(--gold)}
 .prog{display:flex;gap:3px}
 .pip{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.22)}
 .pip.on{background:var(--gold)}
@@ -257,6 +259,10 @@ select option{background:#1b1047;color:#fff}
 .opt.wrong .key{background:rgba(0,0,0,.2)}
 .opt.dim{opacity:.4}
 .opt[disabled]{cursor:default}
+/* blown away by the bomb, and struck out by a spent second chance */
+.opt.gone{opacity:0;pointer-events:none;transform:scale(.9);transition:opacity .3s,transform .3s}
+.opt.struck{opacity:.45;text-decoration:line-through;border-color:var(--bad);animation:shake .4s}
+.opt.struck .key{background:var(--bad);color:var(--bad-ink)}
 @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-7px)}75%{transform:translateX(6px)}}
 .verdict{display:flex;align-items:center;gap:11px;border-radius:var(--r-m);padding:13px 17px;font-weight:900;
   animation:popin .3s both;flex-wrap:wrap}
@@ -269,16 +275,29 @@ select option{background:#1b1047;color:#fff}
 .explain .scripture{display:inline-flex;margin-bottom:7px}
 
 /* lifelines */
-.lifelines{display:flex;gap:10px;flex-wrap:wrap;align-items:center;padding-top:2px}
+/* Five lifelines have to sit on one line inside the question card, so the chips stay tight. */
+.lifelines{display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding-top:2px}
 .lifelines .hint{flex:1 1 100%;margin-top:-4px}
-.ll{display:inline-flex;align-items:center;gap:9px;cursor:pointer;font-family:var(--f-body);
-  font-size:14px;font-weight:800;color:#fff;background:var(--panel-2);border:1px solid var(--line);
-  border-radius:999px;padding:9px 16px;transition:transform .12s,background .14s,color .14s}
+.ll{display:inline-flex;align-items:center;gap:6px;cursor:pointer;font-family:var(--f-body);
+  font-size:13.5px;font-weight:800;color:#fff;background:var(--panel-2);border:1px solid var(--line);
+  border-radius:999px;padding:8px 12px;transition:transform .12s,background .14s,color .14s}
 .ll:hover:not([disabled]){background:var(--gold);color:var(--gold-ink);border-color:transparent;transform:translateY(-2px)}
 .ll:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
 .ll[disabled]{opacity:.3;cursor:not-allowed}
 .ll[disabled] .nm{text-decoration:line-through}
-.ll .secs{font-variant-numeric:tabular-nums;opacity:.75}
+.ll .secs{font-variant-numeric:tabular-nums;font-size:12px;opacity:.75;
+  background:rgba(0,0,0,.26);border-radius:999px;padding:1px 6px}
+/* a second chance that is armed and waiting for the team to answer */
+.ll.armed{background:var(--gold);color:var(--gold-ink);border-color:transparent;opacity:1}
+.ll.armed .nm{text-decoration:none}
+.ll.armed .secs{opacity:1;font-weight:900}
+@media (max-width:620px){
+  .lifelines{gap:7px}
+  .ll{padding:8px 11px;font-size:13px;gap:6px}
+  .ll .nm{display:none}
+}
+/* the streak, on the team card and in the turn bar */
+.flame{display:inline-flex;align-items:center;gap:3px;font-weight:900;color:var(--gold)}
 .consult-num{font-family:var(--f-display);font-size:clamp(56px,15vw,120px);font-weight:800;line-height:1;
   color:var(--gold);font-variant-numeric:tabular-nums}
 .consult-ring{width:100%;height:10px;border-radius:999px;background:rgba(0,0,0,.32);overflow:hidden}

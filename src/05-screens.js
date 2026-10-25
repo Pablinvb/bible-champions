@@ -48,7 +48,8 @@ function steps(){
     ["Form the teams","Two to four teams, each with a name and a colour. They sit around the wheel."],
     ["Spin the wheel","Eight slots: the seven champions and Crown."],
     ["Answer in time","Four options, one correct. Running out of time counts as a wrong answer."],
-    ["Spend a lifeline","The Scroll buys 30 more seconds and Ask a team gives 15 seconds to consult another team. One use of each per match."],
+    ["Right answer, spin again","The turn only passes when you miss. Three in a row is worth a bonus and earns a lifeline."],
+    ["Spend a lifeline","Five of them: more time, a pause to ask another team, a bomb that clears wrong options, a second chance, and a skip to a different question."],
     ["Collect a champion","Enough correct answers in a subject and that champion joins your collection."],
     ["Crown is a shortcut, not a gift","Land on Crown and you choose any champion you are missing — then answer one special question from that subject. Right, it is yours at once. Wrong, you lose the turn."],
     ["Win the match","The first team holding all seven champions wins."]
@@ -57,7 +58,8 @@ function steps(){
     ["Formen los equipos","De dos a cuatro equipos, cada uno con nombre y color. Se sientan alrededor de la ruleta."],
     ["Giren la ruleta","Ocho secciones: los siete campeones y Crown."],
     ["Respondan a tiempo","Cuatro opciones, una correcta. Quedarse sin tiempo cuenta como fallo."],
-    ["Usen un comodín","El Rollo da 30 segundos más y Consultar da 15 segundos para preguntar a otro equipo. Un uso de cada uno por partida."],
+    ["Si aciertan, vuelven a girar","El turno solo pasa cuando fallan. Tres aciertos seguidos dan puntos extra y un comodín."],
+    ["Usen un comodín","Son cinco: más tiempo, una pausa para consultar a otro equipo, una bomba que quita opciones incorrectas, una doble chance y un salto a otra pregunta."],
     ["Consigan un campeón","Con suficientes aciertos en una categoría, ese campeón se une a su colección."],
     ["Crown es un atajo, no un regalo","Si caen en Crown eligen cualquier campeón que les falte y responden una pregunta especial de esa categoría. Si aciertan, es suyo de inmediato. Si fallan, pierden el turno."],
     ["Ganen la partida","El primer equipo que reúna los siete campeones gana."]
@@ -81,6 +83,7 @@ function HowTo(props){
           <tr><td>${T.easy}</td><td class="num">100</td></tr>
           <tr><td>${T.medium}</td><td class="num">200</td></tr>
           <tr><td>${T.hard}</td><td class="num">300</td></tr>
+          <tr><td><b>${T.streak}</b></td><td class="num">+${STREAK_BONUS} … +${STREAK_MAX_BONUS}</td></tr>
           <tr><td><b>${T.collect}</b></td><td class="num">+${UNLOCK_BONUS}</td></tr>
           <tr><td><b>${T.crownQuestion}</b></td><td class="num">+${CROWN_BONUS}</td></tr>
         </tbody></table>
@@ -200,6 +203,14 @@ function Setup(props){
         <${Seg} value=${cfg.needed} onChange=${function(v){patch("needed",v);}}
           items=${[1,2,3].map(function(v){return {v:v,l:String(v)};})}/>
         <span class="hint">${T.neededHint}</span></div>
+      <div class="field"><span class="label">${T.chain}</span>
+        <${Seg} value=${cfg.chain||1} onChange=${function(v){patch("chain",v);}}
+          items=${[{v:1,l:T.chainOff},{v:2,l:"2"},{v:3,l:"3"},{v:5,l:"5"}]}/>
+        <span class="hint">${T.chainHint}</span></div>
+      <div class="field"><span class="label">${T.earn}</span>
+        <${Seg} value=${cfg.earn!==false} onChange=${function(v){patch("earn",v);}}
+          items=${[{v:true,l:T.on},{v:false,l:T.off}]}/>
+        <span class="hint">${T.earnHint}</span></div>
       <div class="field"><span class="label">${T.options}</span>
         <${Seg} value=${cfg.shuffleOpts} onChange=${function(v){patch("shuffleOpts",v);}}
           items=${[{v:true,l:T.shuffleOpts},{v:false,l:T.fixedOpts}]}/></div>
@@ -412,7 +423,8 @@ function Bank(props){
 var DEFAULT_SETTINGS={
   teams:[{name:"Equipo 1",color:TEAM_COLORS[0]},{name:"Equipo 2",color:TEAM_COLORS[1]}],
   language:"es", difficulty:"mixed", timer:30, needed:2,
-  shuffleOpts:true, verifiedOnly:true, calm:false
+  shuffleOpts:true, verifiedOnly:true, calm:false,
+  chain:3, earn:true
 };
 function App(){
   var sc=useState("home"), screen=sc[0], setScreen=sc[1];
@@ -425,12 +437,18 @@ function App(){
     if(saved&&saved.teams&&saved.teams.length&&saved.teams[0].progress&&saved.settings){
       if(saved.phase==="spinning"||saved.phase==="reveal") saved.phase="spin";
       saved.teams.forEach(function(t){
-        if(!t.lifelines) t.lifelines=freshLifelines();
+        migrateLifelines(t);
         if(t.crownWins===undefined) t.crownWins=0;
+        if(t.streak===undefined) t.streak=0;
+        if(t.best===undefined) t.best=0;
       });
       if(saved.timeMax===undefined) saved.timeMax=saved.settings.timer||30;
       if(!saved.settings.language) saved.settings.language="es";
+      if(!saved.settings.chain) saved.settings.chain=1;
+      if(saved.settings.earn===undefined) saved.settings.earn=false;
+      if(!saved.chain) saved.chain=1;
       saved.consult=null; saved.paused=false;
+      saved.hidden=null; saved.second=false; saved.strike=null;
       return saved;
     }
     return null;
@@ -465,10 +483,11 @@ function App(){
       return {id:"t"+i+"_"+Date.now().toString(36),
         name:(tm.name||((LANG==="en"?"Team ":"Equipo ")+(i+1))).trim(),
         color:tm.color,score:0,correct:0,wrong:0,unlocked:[],progress:{},crownWins:0,
-        lifelines:freshLifelines()};
+        streak:0,best:0,lifelines:freshLifelines()};
     });
-    setMatch({settings:clone(cfg),teams:teams,turn:0,used:{},log:[],phase:"spin",q:null,cat:null,
-      pick:null,ok:null,gained:0,pendingUnlock:null,crownMissed:false,
+    setMatch({settings:clone(cfg),teams:teams,turn:0,chain:1,used:{},log:[],phase:"spin",q:null,cat:null,
+      pick:null,ok:null,gained:0,streakBonus:0,gotLL:null,again:false,
+      pendingUnlock:null,crownMissed:false,hidden:null,second:false,strike:null,
       fromWheel:false,winner:null,paused:false,timeLeft:cfg.timer,timeMax:cfg.timer,startedAt:Date.now()});
     setScreen("game");
   }

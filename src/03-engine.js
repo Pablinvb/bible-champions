@@ -359,16 +359,51 @@ function Tile(props){
 }
 function llName(id){ return T["ll"+id.charAt(0).toUpperCase()+id.slice(1)]||id; }
 function llHint(id){ return T["ll"+id.charAt(0).toUpperCase()+id.slice(1)+"Hint"]||""; }
-function freshLifelines(){ var o={}; LIFELINES.forEach(function(l){ o[l.id]=true; }); return o; }
+function llSpec(id){ for(var i=0;i<LIFELINES.length;i++) if(LIFELINES[i].id===id) return LIFELINES[i]; return null; }
+function freshLifelines(){ var o={}; LIFELINES.forEach(function(l){ o[l.id]=1; }); return o; }
+/* How many of one lifeline a team is holding. Matches saved before the bank of five existed
+   stored a plain true/false per lifeline, so both shapes have to read the same. */
+function llCount(tm,id){
+  var v=tm&&tm.lifelines?tm.lifelines[id]:0;
+  if(v===true) return 1;
+  if(v===false||v==null) return 0;
+  return parseInt(v,10)||0;
+}
+function migrateLifelines(tm){
+  var o={};
+  LIFELINES.forEach(function(l){
+    var v=tm.lifelines?tm.lifelines[l.id]:undefined;
+    o[l.id]=(v===undefined?1:(v===true?1:(v===false?0:(parseInt(v,10)||0))));
+  });
+  tm.lifelines=o;
+}
+/* A reward is one random lifeline the team is not already full on, so the prize is a small
+   surprise and nobody ends the match sitting on five bombs. */
+function grantLifeline(tm){
+  var pool=LIFELINES.filter(function(l){ return llCount(tm,l.id)<LL_CAP; });
+  if(!pool.length) return null;
+  var pick=pool[Math.floor(Math.random()*pool.length)];
+  tm.lifelines[pick.id]=llCount(tm,pick.id)+1;
+  return pick.id;
+}
 function LLIcon(props){
-  var sz=props.size||18;
-  if(props.id==="scroll") return html`<svg viewBox="0 0 24 24" width=${sz} height=${sz} fill="none"
-    stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  var sz=props.size||18, id=props.id;
+  var common={viewBox:"0 0 24 24",width:sz,height:sz,fill:"none",stroke:"currentColor",
+    "stroke-width":1.9,"stroke-linecap":"round","stroke-linejoin":"round","aria-hidden":"true"};
+  if(id==="scroll") return html`<svg ...${common}>
     <path d="M6 3h12a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6"/>
     <path d="M6 3a2 2 0 0 0-2 2v2h4"/><path d="M6 21a2 2 0 0 0 2-2V7"/>
     <line x1="11" y1="9" x2="17" y2="9"/><line x1="11" y1="13" x2="17" y2="13"/></svg>`;
-  return html`<svg viewBox="0 0 24 24" width=${sz} height=${sz} fill="none" stroke="currentColor"
-    stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  if(id==="bomb") return html`<svg ...${common}>
+    <circle cx="10.5" cy="15" r="6.2"/><path d="M15 10.5 17.6 7.9"/>
+    <path d="M17.2 6.2a2.2 2.2 0 1 1 2.6 2.6"/>
+    <path d="M20.6 3.4v1.6M22.8 5.6h-1.6"/></svg>`;
+  if(id==="double") return html`<svg ...${common}>
+    <path d="M3.5 9.5a7.5 7.5 0 0 1 12.8-4.3L20 8.5"/><path d="M20 3.8v4.7h-4.7"/>
+    <path d="M20.5 14.5a7.5 7.5 0 0 1-12.8 4.3L4 15.5"/><path d="M4 20.2v-4.7h4.7"/></svg>`;
+  if(id==="skip") return html`<svg ...${common}>
+    <path d="M4.5 5.5 13 12l-8.5 6.5z"/><line x1="18" y1="5.5" x2="18" y2="18.5"/></svg>`;
+  return html`<svg ...${common} stroke-width="2">
     <circle cx="9" cy="8" r="3.2"/><path d="M2.8 20c0-3.4 2.8-6.2 6.2-6.2S15.2 16.6 15.2 20"/>
     <circle cx="17.6" cy="9.8" r="2.3"/><path d="M15.9 14.9c2.9.2 5.3 2.6 5.3 5.1"/></svg>`;
 }
@@ -434,11 +469,12 @@ function TeamCard(props){
     </div>
     <div class="meter">
       <span class="ll-mini">${LIFELINES.map(function(l){
-        var left=!!(team.lifelines&&team.lifelines[l.id]);
-        return html`<span key=${l.id} class=${left?"":"spent"} title=${llName(l.id)+(left?"":" — "+T.llUsed)}>
-          <${LLIcon} id=${l.id} size=${13}/></span>`;
+        var n=llCount(team,l.id);
+        return html`<span key=${l.id} class=${n?"":"spent"} title=${llName(l.id)+" ×"+n}>
+          <${LLIcon} id=${l.id} size=${12}/>${n>1?html`<b class="tnum">${n}</b>`:null}</span>`;
       })}</span>
       <span class="spacer"></span>
+      ${team.streak>=2?html`<span class="flame tnum" title=${T.streak}>🔥${team.streak}</span>`:null}
       <span class="tnum">${team.unlocked.length}/${CATS.length}</span>
     </div>
   </div>`;

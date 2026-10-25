@@ -49,11 +49,21 @@ var POINTS={easy:100,medium:200,hard:300};
 var UNLOCK_BONUS=150;   /* winning a champion */
 var CROWN_BONUS=200;    /* answering a crown challenge correctly */
 var TEAM_COLORS=["#7428e8","#08c9cf","#ff624f","#19c97d","#ff4eb8","#2563eb","#ff9f1c","#b14ad8"];
-/* Lifelines: one use of each per team for the whole match. */
+/* Lifelines. Every team starts with one of each and earns more by playing well; no team ever
+   holds more than LL_CAP of the same one, so they get spent instead of hoarded. */
 var LIFELINES=[
   {id:"scroll", secs:30, mode:"extend"},
-  {id:"ask",    secs:15, mode:"consult"}
+  {id:"ask",    secs:15, mode:"consult"},
+  {id:"bomb",            mode:"fifty"},
+  {id:"double",          mode:"second"},
+  {id:"skip",            mode:"swap"}
 ];
+var LL_CAP=3;
+/* The streak. Two right in a row is worth +50, three +100, and the bonus stops climbing at
+   +150 so a runaway team cannot put the match out of reach. Every STREAK_STEP in a row also
+   earns a lifeline, as does winning a crown challenge. */
+var STREAK_BONUS=50, STREAK_MAX_BONUS=150, STREAK_STEP=3;
+function streakBonus(n){ return n>=2?Math.min(STREAK_MAX_BONUS,(n-1)*STREAK_BONUS):0; }
 
 /* ============================ strings ============================ */
 /* Every player-facing string lives here in both languages. `T` is rebuilt whenever the
@@ -146,12 +156,35 @@ var STR={
   fixedOpts:{en:"Keep A·B·C·D order",es:"Mantener el orden A·B·C·D"},
   allWon:{en:"Every champion is already collected.",es:"Ya se consiguieron todos los campeones."},
   lifelines:{en:"Lifelines",es:"Comodines"},
-  llOnce:{en:"One use each per match",es:"Un uso de cada uno por partida"},
+  llOnce:{en:"One of each to start — the rest are earned by playing well",
+          es:"Uno de cada uno para empezar; los demás se ganan jugando bien"},
   llUsed:{en:"Used",es:"Usado"},
   llScroll:{en:"Scroll",es:"Rollo"},
   llScrollHint:{en:"Look it up in the Bible — 30 seconds more",es:"Búscalo en la Biblia: 30 segundos más"},
   llAsk:{en:"Ask a team",es:"Consultar"},
   llAskHint:{en:"15 seconds to ask another team",es:"15 segundos para consultar a otro equipo"},
+  llBomb:{en:"Bomb",es:"Bomba"},
+  llBombHint:{en:"Blows away the wrong options until only one is left",
+              es:"Vuela las opciones incorrectas hasta dejar solo una"},
+  llDouble:{en:"Second chance",es:"Doble chance"},
+  llDoubleHint:{en:"One more try if the first answer is wrong",es:"Un intento más si fallas el primero"},
+  llSkip:{en:"Skip",es:"Saltar"},
+  llSkipHint:{en:"Another question from the same subject",es:"Otra pregunta de la misma categoría"},
+  llArmed:{en:"Ready",es:"Listo"},
+  llEarned:{en:"Lifeline earned",es:"Comodín ganado"},
+  llReset:{en:"Reset lifelines",es:"Reiniciar comodines"},
+  streak:{en:"Streak",es:"Racha"},
+  bestStreak:{en:"Best streak",es:"Mejor racha"},
+  keepTurn:{en:"Spin again",es:"Girar otra vez"},
+  keepPlaying:{en:"The turn stays with you",es:"El turno sigue siendo tuyo"},
+  spinOf:{en:"Spin",es:"Giro"},
+  chain:{en:"Spins in a row",es:"Giros seguidos al acertar"},
+  chainHint:{en:"How many times a team may spin again after a correct answer. One turns it off.",
+             es:"Cuántas veces puede volver a girar un equipo tras acertar. Uno lo desactiva."},
+  chainOff:{en:"One",es:"Uno"},
+  earn:{en:"Earn lifelines",es:"Ganar comodines"},
+  earnHint:{en:"A lifeline for every three correct answers in a row, and one for every crown challenge won.",
+            es:"Un comodín por cada tres aciertos seguidos y otro por cada reto de Crown ganado."},
   consultTitle:{en:"Ask another team",es:"Consulta a otro equipo"},
   consultSub:{en:"The clock is paused. Answer when you are ready.",
               es:"El reloj está en pausa. Responde cuando estés listo."},
