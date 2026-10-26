@@ -184,6 +184,8 @@ function confetti(ms){
   confettiStop=Date.now()+(ms||4200);
   if(confettiRunning) return;
   confettiRunning=true;
+  /* one listener per run, taken down with the animation — a long match fires this many times */
+  window.addEventListener("resize",size);
   (function frame(){
     ctx.clearRect(0,0,cv.width,cv.height);
     for(var i=0;i<parts.length;i++){
@@ -193,9 +195,11 @@ function confetti(ms){
       ctx.fillStyle=p.c; ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h); ctx.restore();
     }
     if(Date.now()<confettiStop) requestAnimationFrame(frame);
-    else { ctx.clearRect(0,0,cv.width,cv.height); cv.hidden=true; confettiRunning=false; }
+    else {
+      ctx.clearRect(0,0,cv.width,cv.height); cv.hidden=true; confettiRunning=false;
+      window.removeEventListener("resize",size);
+    }
   })();
-  window.addEventListener("resize",size);
 }
 
 /* ---- starfield ---- */

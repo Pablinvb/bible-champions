@@ -1,8 +1,10 @@
 <div id="root"></div>
 <canvas id="confetti" hidden></canvas>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/htm/3.1.1/htm.js"></script>
+<!-- React 18.3.1, ReactDOM 18.3.1 and htm 3.1.1, served from this repository: a hall with no
+     wifi is the normal case, not the exception. See vendor/README.md. -->
+<script src="vendor/react.production.min.js"></script>
+<script src="vendor/react-dom.production.min.js"></script>
+<script src="vendor/htm.js"></script>
 <script>
 (function(){
 "use strict";
@@ -142,7 +144,8 @@ var STR={
   review:{en:"Answer log",es:"Historial"}, restart:{en:"Restart match",es:"Reiniciar partida"},
   exit:{en:"Exit to home",es:"Salir al inicio"},
   sound:{en:"Sound effects",es:"Efectos de sonido"}, music:{en:"Music",es:"Música"},
-  volume:{en:"Volume",es:"Volumen"}, low:{en:"Low",es:"Bajo"}, high:{en:"High",es:"Alto"},
+  volume:{en:"Volume",es:"Volumen"}, low:{en:"Low",es:"Bajo"},
+  mid:{en:"Medium",es:"Medio"}, high:{en:"High",es:"Alto"},
   close:{en:"Close",es:"Cerrar"}, noLog:{en:"No answers yet.",es:"Todavía no hay respuestas."},
   team:{en:"Team",es:"Equipo"}, characters:{en:"Champions",es:"Campeones"},
   hits:{en:"Correct",es:"Aciertos"}, misses:{en:"Wrong",es:"Fallos"},

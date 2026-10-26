@@ -11,6 +11,7 @@
  * They carry .js and .html extensions only so editors colour them.
  */
 import { readFileSync, writeFileSync } from "node:fs";
+import { createHash } from "node:crypto";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 
@@ -67,3 +68,11 @@ const page =
 const out = join(here, "index.html");
 writeFileSync(out, page);
 console.log(`index.html  ${(page.length / 1024).toFixed(0)} KB  from ${FRAGMENTS.length} fragments`);
+
+/* The service worker is stamped with a hash of the page it caches, so every build is a new
+   cache name and the previous one is dropped on activation. Without this a published change
+   would sit behind the old cache on every device that had already opened the game. */
+const build = createHash("sha256").update(page).digest("hex").slice(0, 10);
+const sw = readFileSync(src("sw.js"), "utf8").replace("__BUILD__", build);
+writeFileSync(join(here, "sw.js"), sw);
+console.log(`sw.js       build ${build}`);

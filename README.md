@@ -7,8 +7,9 @@ eight-slot wheel, answer questions drawn from the Scriptures, and race to collec
 champions. Crown is the eighth slot: a wildcard that lets a team *choose* which champion it
 wants — but it still has to answer for it.
 
-Runs in any modern browser, on a laptop, a projector, a TV or a tablet. No install, no account,
-no network once the page has loaded (React and htm come from a CDN on first load).
+Runs in any modern browser, on a laptop, a projector, a TV or a tablet. No install, no account
+and **no network at all** — React, htm and both typefaces are served from this repository, and a
+service worker keeps the whole game on the device after the first visit.
 
 ---
 
@@ -32,9 +33,24 @@ Then open <http://localhost:8099>.
 node build.mjs
 ```
 
-That concatenates thirteen fragments in a fixed order and wraps them in the HTML document.
-**Never edit `index.html` by hand** — the next build overwrites it. To publish, run the build,
+That concatenates thirteen fragments in a fixed order and wraps them in the HTML document, and
+writes `sw.js` from `src/sw.js` stamped with a hash of the page it just built. **Never edit
+`index.html` or `sw.js` by hand** — the next build overwrites them. To publish, run the build,
 commit, and push: GitHub Pages serves the repository root.
+
+## Offline
+
+The game is meant for halls with no wifi, so nothing it needs comes from anywhere else:
+
+- `vendor/` holds React, ReactDOM and htm; `fonts/` holds Baloo 2 and Outfit. There is not a
+  single external request in `index.html`.
+- `sw.js` caches the page, the libraries, the fonts and the eight portraits on the first visit
+  and serves them from the cache from then on, refreshing them in the background. Open the game
+  once with a connection and it keeps working with the network off, reloads included.
+- Each build gets its own cache name, so a published change replaces the old cache instead of
+  hiding behind it. Nothing needs clearing between versions.
+- Opening `index.html` straight off the disk works too — the service worker is skipped there,
+  and the game does not need it.
 
 ---
 
@@ -213,9 +229,11 @@ answer are dropped silently, so check the count the toast reports.
 | `src/03-engine.js` | closes `SEED]`, then storage, audio, confetti, starfield, bank filtering, CSV/JSON import-export, the wheel, the team card |
 | `src/04-game.js` | host panel and the match: turns, timer, answering, Crown, lifelines, victory |
 | `src/05-screens.js` | home, how to play, setup, settings, question bank editor, app shell, React boot |
+| `src/sw.js` | the service worker, before the build stamps its version |
 
-Everything else is output or assets: `art/` (eight champion portraits), `audio/`, `favicon.png`,
-`social-card.jpg`, `index.html`.
+Everything else is output or assets: `art/` (eight champion portraits), `audio/`, `vendor/` and
+`fonts/` (third party, see `vendor/README.md`), `favicon.png`, `social-card.jpg`, `index.html`
+and `sw.js`.
 
 The fragments are **order-dependent**: `02-config.js` opens the `SEED` array, the question files
 are its rows, `03-engine.js` closes it. `build.mjs` splits the joined text on `<div id="root">`

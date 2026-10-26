@@ -15,6 +15,16 @@ function toggleFullscreen(){
     else document.documentElement.requestFullscreen();
   }catch(e){}
 }
+/* the browser can leave full screen on its own (Escape), so the button follows the browser */
+function useFullscreen(){
+  var st=useState(!!document.fullscreenElement), on=st[0], set=st[1];
+  useEffect(function(){
+    function h(){ set(!!document.fullscreenElement); }
+    document.addEventListener("fullscreenchange",h);
+    return function(){ document.removeEventListener("fullscreenchange",h); };
+  },[]);
+  return on;
+}
 
 /* ============================ home ============================ */
 function Home(props){
@@ -120,7 +130,7 @@ function HowTo(props){
 
 /* ============================ settings ============================ */
 function Settings(props){
-  var s=props.settings, au=props.audio;
+  var s=props.settings, au=props.audio, fs=useFullscreen();
   function patch(k,v){ props.setSettings(function(p){ var n=Object.assign({},p); n[k]=v; return n; }); }
   return html`<div class="wrap" style=${{paddingBottom:"48px"}}>
     <${TopBar} back=${function(){props.go("home");}} title=${T.settings}
@@ -138,7 +148,7 @@ function Settings(props){
           items=${[{v:true,l:T.on},{v:false,l:T.off}]}/></div>
       <div class="field"><span class="label">${T.volume}</span>
         <${Seg} value=${au.vol} onChange=${function(v){ props.setAudio({vol:v}); }}
-          items=${[{v:0.35,l:T.low},{v:0.75,l:T.medium},{v:1,l:T.high}]}/></div>
+          items=${[{v:0.35,l:T.low},{v:0.75,l:T.mid},{v:1,l:T.high}]}/></div>
       <div class="field"><span class="label">${T.motion}</span>
         <${Seg} value=${!!s.calm} onChange=${function(v){patch("calm",v);}}
           items=${[{v:false,l:T.motionFull},{v:true,l:T.motionCalm}]}/></div>
@@ -148,7 +158,7 @@ function Settings(props){
         <span class="hint">${T.projectorHint}</span></div>
       <div class="field"><span class="label">${T.fullscreen}</span>
         <div><button class="btn sm ghost" onClick=${function(){ sfx("click"); toggleFullscreen(); }}>
-          ${document.fullscreenElement?T.exitFs:T.enterFs}</button></div></div>
+          ${fs?T.exitFs:T.enterFs}</button></div></div>
     </div>
     <p class="hint" style=${{marginTop:"14px"}}>${T.settingsNote}</p>
     <div style=${{marginTop:"18px"}}>
@@ -474,9 +484,11 @@ function App(){
     return null;
   }), match=ms[0], setMatch=ms[1];
 
-  /* the language in play: a running match keeps the one it was started with */
+  /* The language in play: a running match keeps the one it was started with. Every component
+     reads the module-level `T`, so it has to be rebuilt before the children render, not in an
+     effect afterwards — useMemo keeps that to once per change instead of once per render. */
   var lang=(screen==="game"&&match&&match.settings.language)||settings.language;
-  setLang(lang);
+  useMemo(function(){ setLang(lang); },[lang]);
 
   function setAudio(patch){
     setAudioState(function(p){ var n=Object.assign({},p,patch); applyAudio(n); audioResume(); return n; });
@@ -539,6 +551,34 @@ function App(){
   }
   return html`<${React.Fragment}><${Stars}/><div class="app">${view}</div><//>`;
 }
+
+/* Offline. The service worker keeps the whole game on the device; the fonts are asked for
+   separately because the browser only fetches the weights a page actually paints, and a first
+   visit that never reaches a question would otherwise leave half of them behind. */
+function goOffline(){
+  if(!("serviceWorker" in navigator)||location.protocol==="file:") return;
+  navigator.serviceWorker.register("sw.js").then(function(){
+    var urls=[];
+    try{
+      for(var i=0;i<document.styleSheets.length;i++){
+        var ss=document.styleSheets[i];
+        if(!ss.href||ss.href.indexOf("fonts.css")<0) continue;
+        var rules=ss.cssRules||[];
+        for(var j=0;j<rules.length;j++){
+          var m=/url\(["']?([^"')]+\.woff2)["']?\)/.exec(rules[j].cssText||"");
+          if(m) urls.push(new URL(m[1],ss.href).href);
+        }
+      }
+    }catch(e){}
+    if(urls.length&&navigator.serviceWorker.controller)
+      navigator.serviceWorker.controller.postMessage({type:"cache-fonts",urls:urls});
+    else if(urls.length)
+      navigator.serviceWorker.ready.then(function(reg){
+        if(reg.active) reg.active.postMessage({type:"cache-fonts",urls:urls});
+      });
+  }).catch(function(){});
+}
+window.addEventListener("load",goOffline);
 
 var root=ReactDOM.createRoot(document.getElementById("root"));
 function boot(){ root.render(html`<${App}/>`); }

@@ -56,7 +56,7 @@ function Drawer(props){
     </div>
     <div class="field" style=${{marginTop:"10px"}}><span class="label">${T.volume}</span>
       <${Seg} value=${au.vol} onChange=${function(v){ props.setAudio({vol:v}); }}
-        items=${[{v:0.35,l:T.low},{v:0.75,l:T.medium},{v:1,l:T.high}]}/></div>
+        items=${[{v:0.35,l:T.low},{v:0.75,l:T.mid},{v:1,l:T.high}]}/></div>
 
     <h3>${T.adjust}</h3>
     ${m.teams.map(function(tm,i){ return html`<div key=${tm.id} class="row between" style=${{marginBottom:"8px"}}>
