@@ -142,6 +142,10 @@ function Settings(props){
       <div class="field"><span class="label">${T.motion}</span>
         <${Seg} value=${!!s.calm} onChange=${function(v){patch("calm",v);}}
           items=${[{v:false,l:T.motionFull},{v:true,l:T.motionCalm}]}/></div>
+      <div class="field"><span class="label">${T.projector}</span>
+        <${Seg} value=${!!s.projector} onChange=${function(v){patch("projector",v);}}
+          items=${[{v:false,l:T.off},{v:true,l:T.on}]}/>
+        <span class="hint">${T.projectorHint}</span></div>
       <div class="field"><span class="label">${T.fullscreen}</span>
         <div><button class="btn sm ghost" onClick=${function(){ sfx("click"); toggleFullscreen(); }}>
           ${document.fullscreenElement?T.exitFs:T.enterFs}</button></div></div>
@@ -203,6 +207,16 @@ function Setup(props){
         <${Seg} value=${cfg.needed} onChange=${function(v){patch("needed",v);}}
           items=${[1,2,3].map(function(v){return {v:v,l:String(v)};})}/>
         <span class="hint">${T.neededHint}</span></div>
+      <div class="field"><span class="label">${T.goal}</span>
+        <${Seg} value=${cfg.goal||"champions"} onChange=${function(v){patch("goal",v);}}
+          items=${[{v:"champions",l:T.goalChampions},{v:"rounds",l:T.goalRounds},{v:"time",l:T.goalTime}]}/>
+        <span class="hint">${T.goalHint}</span></div>
+      ${cfg.goal==="rounds"?html`<div class="field"><span class="label">${T.rounds}</span>
+        <${Seg} value=${cfg.rounds||5} onChange=${function(v){patch("rounds",v);}}
+          items=${ROUND_CHOICES.map(function(v){return {v:v,l:String(v)};})}/></div>`:null}
+      ${cfg.goal==="time"?html`<div class="field"><span class="label">${T.minutes}</span>
+        <${Seg} value=${cfg.minutes||15} onChange=${function(v){patch("minutes",v);}}
+          items=${MINUTE_CHOICES.map(function(v){return {v:v,l:String(v)};})}/></div>`:null}
       <div class="field"><span class="label">${T.chain}</span>
         <${Seg} value=${cfg.chain||1} onChange=${function(v){patch("chain",v);}}
           items=${[{v:1,l:T.chainOff},{v:2,l:"2"},{v:3,l:"3"},{v:5,l:"5"}]}/>
@@ -424,7 +438,8 @@ var DEFAULT_SETTINGS={
   teams:[{name:"Equipo 1",color:TEAM_COLORS[0]},{name:"Equipo 2",color:TEAM_COLORS[1]}],
   language:"es", difficulty:"mixed", timer:30, needed:2,
   shuffleOpts:true, verifiedOnly:true, calm:false,
-  chain:3, earn:true
+  chain:3, earn:true,
+  goal:"champions", rounds:5, minutes:15, projector:false
 };
 function App(){
   var sc=useState("home"), screen=sc[0], setScreen=sc[1];
@@ -446,7 +461,12 @@ function App(){
       if(!saved.settings.language) saved.settings.language="es";
       if(!saved.settings.chain) saved.settings.chain=1;
       if(saved.settings.earn===undefined) saved.settings.earn=false;
+      if(!saved.settings.goal) saved.settings.goal="champions";
       if(!saved.chain) saved.chain=1;
+      if(saved.turnsDone===undefined) saved.turnsDone=0;
+      if(saved.elapsed===undefined) saved.elapsed=0;
+      if(saved.tie===undefined) saved.tie=null;
+      saved.timeUp=!!saved.timeUp;
       saved.consult=null; saved.paused=false;
       saved.hidden=null; saved.second=false; saved.strike=null;
       return saved;
@@ -470,6 +490,9 @@ function App(){
     document.documentElement.classList.toggle("calm",!!settings.calm);
   },[settings.calm]);
   useEffect(function(){
+    document.documentElement.classList.toggle("proj",!!settings.projector);
+  },[settings.projector]);
+  useEffect(function(){
     function once(){ audioResume(); }
     window.addEventListener("pointerdown",once,{once:true});
     window.addEventListener("keydown",once,{once:true});
@@ -485,10 +508,12 @@ function App(){
         color:tm.color,score:0,correct:0,wrong:0,unlocked:[],progress:{},crownWins:0,
         streak:0,best:0,lifelines:freshLifelines()};
     });
-    setMatch({settings:clone(cfg),teams:teams,turn:0,chain:1,used:{},log:[],phase:"spin",q:null,cat:null,
-      pick:null,ok:null,gained:0,streakBonus:0,gotLL:null,again:false,
+    setMatch({settings:clone(cfg),teams:teams,turn:0,chain:1,turnsDone:0,elapsed:0,timeUp:false,
+      used:{},log:[],phase:"spin",q:null,cat:null,
+      pick:null,ok:null,gained:0,streakBonus:0,gotLL:null,again:false,tie:null,
       pendingUnlock:null,crownMissed:false,hidden:null,second:false,strike:null,
-      fromWheel:false,winner:null,paused:false,timeLeft:cfg.timer,timeMax:cfg.timer,startedAt:Date.now()});
+      fromWheel:false,winner:null,byPoints:false,tieWon:false,paused:false,
+      timeLeft:cfg.timer,timeMax:cfg.timer,startedAt:Date.now()});
     setScreen("game");
   }
   function newGame(){ setMatch(null); setScreen("setup"); }
@@ -498,7 +523,9 @@ function App(){
   var view;
   if(screen==="game"&&match){
     view=html`<${Game} match=${match} setMatch=${setMatch} bank=${bank}
-      audio=${audio} setAudio=${setAudio} onExit=${exitHome} onNewGame=${newGame}/>`;
+      audio=${audio} setAudio=${setAudio} onExit=${exitHome} onNewGame=${newGame}
+      projector=${!!settings.projector}
+      setProjector=${function(v){ setSettings(function(p){ return Object.assign({},p,{projector:v}); }); }}/>`;
   } else if(screen==="setup"){
     view=html`<${Setup} ...${common} settings=${settings} bank=${bank} onStart=${start}/>`;
   } else if(screen==="howto"){

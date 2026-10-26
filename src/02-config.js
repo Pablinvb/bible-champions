@@ -45,6 +45,10 @@ var CAT_BY_ID={}; CATS.forEach(function(c){CAT_BY_ID[c.id]=c;}); CAT_BY_ID.crown
 
 var LANGS=[{id:"es",name:"Español"},{id:"en",name:"English"}];
 var DIFFS=["easy","medium","hard"];
+/* How a match ends: by collecting all seven, after a number of rounds, or against a clock.
+   The last two finish on points — champions first, score as the tie-break — and a dead level
+   at the top goes to sudden death rather than being called a draw. */
+var ROUND_CHOICES=[3,5,8], MINUTE_CHOICES=[10,15,20,30];
 var POINTS={easy:100,medium:200,hard:300};
 var UNLOCK_BONUS=150;   /* winning a champion */
 var CROWN_BONUS=200;    /* answering a crown challenge correctly */
@@ -107,6 +111,27 @@ var STR={
               es:"Responde una pregunta especial de esa categoría. Si aciertas, el campeón es tuyo. Si fallas, pierdes el turno."},
   crownQuestion:{en:"Crown challenge",es:"Reto de Crown"},
   crownMissed:{en:"The crown opportunity is lost",es:"Se pierde la oportunidad de Crown"},
+  goal:{en:"Match ends",es:"La partida termina"},
+  goalChampions:{en:"With all seven",es:"Con los siete"},
+  goalRounds:{en:"After rounds",es:"Tras unas rondas"},
+  goalTime:{en:"On the clock",es:"Al acabar el tiempo"},
+  goalHint:{en:"Rounds and the clock finish on points: most champions first, then the score. A dead level at the top goes to sudden death.",
+            es:"Con rondas o reloj se gana por puntos: primero los campeones, luego la puntuación. Si hay empate arriba, se va a muerte súbita."},
+  rounds:{en:"Rounds",es:"Rondas"}, minutes:{en:"Minutes",es:"Minutos"},
+  roundT:{en:"Round",es:"Ronda"}, lastTurn:{en:"Last turn",es:"Último turno"},
+  endNow:{en:"End and declare a winner",es:"Terminar y declarar ganador"},
+  byPoints:{en:"Winner on points",es:"Ganador por puntos"},
+  byChampions:{en:"Collected all seven champions",es:"Reunió a los siete campeones"},
+  tiebreak:{en:"Sudden death",es:"Muerte súbita"},
+  tieIntro:{en:"Level on champions and points. One question each: whoever gets it right stays in.",
+            es:"Empate en campeones y puntos. Una pregunta cada uno: quien acierte sigue dentro."},
+  tieAgain:{en:"Still level — they go again",es:"Siguen empatados: otra ronda"},
+  tieNone:{en:"Nobody got it — the same teams go again",es:"Nadie acertó: repiten los mismos equipos"},
+  tieRound:{en:"Round",es:"Ronda"}, tieStill:{en:"Still in",es:"Siguen dentro"},
+  tieWon:{en:"Won the tie-break",es:"Ganó el desempate"},
+  projector:{en:"Projector mode",es:"Modo proyector"},
+  projectorHint:{en:"Bigger text for a screen the whole room reads.",
+                 es:"Texto más grande para una pantalla que lee toda la sala."},
   winner:{en:"Champions",es:"Campeones"}, finalScore:{en:"Final score",es:"Puntuación final"},
   summary:{en:"Match summary",es:"Resumen de la partida"},
   playAgain:{en:"Play again",es:"Jugar otra vez"}, newGame:{en:"New game",es:"Partida nueva"},

@@ -120,6 +120,15 @@ function Drawer(props){
     <div class="field" style=${{marginTop:"12px"}}><span class="label">${T.difficulty}</span>
       <${Seg} value=${s.difficulty} onChange=${function(v){patchSettings("difficulty",v);}}
         items=${[{v:"easy",l:T.easy},{v:"medium",l:T.medium},{v:"hard",l:T.hard},{v:"mixed",l:T.mixed}]}/></div>
+    <div class="field" style=${{marginTop:"12px"}}><span class="label">${T.goal}</span>
+      <${Seg} value=${s.goal||"champions"} onChange=${function(v){patchSettings("goal",v);}}
+        items=${[{v:"champions",l:T.goalChampions},{v:"rounds",l:T.goalRounds},{v:"time",l:T.goalTime}]}/></div>
+    ${s.goal==="rounds"?html`<div class="field" style=${{marginTop:"12px"}}><span class="label">${T.rounds}</span>
+      <${Seg} value=${s.rounds||5} onChange=${function(v){patchSettings("rounds",v);}}
+        items=${ROUND_CHOICES.map(function(v){return {v:v,l:String(v)};})}/></div>`:null}
+    ${s.goal==="time"?html`<div class="field" style=${{marginTop:"12px"}}><span class="label">${T.minutes}</span>
+      <${Seg} value=${s.minutes||15} onChange=${function(v){patchSettings("minutes",v);}}
+        items=${MINUTE_CHOICES.map(function(v){return {v:v,l:String(v)};})}/></div>`:null}
     <div class="field" style=${{marginTop:"12px"}}><span class="label">${T.chain}</span>
       <${Seg} value=${s.chain||1} onChange=${function(v){patchSettings("chain",v);}}
         items=${[{v:1,l:T.chainOff},{v:2,l:"2"},{v:3,l:"3"},{v:5,l:"5"}]}/></div>
@@ -137,8 +146,15 @@ function Drawer(props){
         <span class="muted">${L.q}</span></div>`;
     }):html`<p class="muted" style=${{fontSize:"13.5px"}}>${T.noLog}</p>`}
 
+    <h3>${T.projector}</h3>
+    <${Seg} value=${!!props.projector} onChange=${function(v){ sfx("click"); props.setProjector(v); }}
+      items=${[{v:false,l:T.off},{v:true,l:T.on}]}/>
+    <p class="hint" style=${{marginTop:"8px"}}>${T.projectorHint}</p>
+
     <h3>${T.restart}</h3>
     <div class="row">
+      <button class="btn sm ghost" disabled=${m.phase==="victory"}
+        onClick=${function(){ ask(T.endNow+" — "+T.confirmSure,props.onEndNow); }}>${T.endNow}</button>
       <button class="btn sm ghost" onClick=${function(){ ask(T.restart+" — "+T.confirmSure,props.onRestart); }}>${T.restart}</button>
       <button class="btn sm ghost" onClick=${function(){ ask(T.exit+" — "+T.confirmSure,props.onExit); }}>${T.exit}</button>
     </div>
@@ -232,12 +248,28 @@ function Game(props){
     if(m.phase==="victory"||m.phase==="unlock"||m.pendingUnlock) return;
     for(var i=0;i<m.teams.length;i++){
       if(m.teams[i].unlocked.length>=CATS.length){
-        sfx("win"); confetti(11000);
         setM(function(p){ return Object.assign({},p,{phase:"victory",winner:i,endedAt:Date.now()}); });
         return;
       }
     }
   },[m.teams,m.phase]);
+  /* one place cheers, whichever of the four ways the match ended */
+  useEffect(function(){ if(m.phase==="victory"){ sfx("win"); confetti(11000); } },[m.phase==="victory"]);
+
+  /* The match clock. It only runs in the timed mode, it stops when the host pauses, and when
+     it reaches zero the running turn is still played out — the team in the chair is not cut
+     off mid-question. */
+  useEffect(function(){
+    if(s.goal!=="time"||m.paused||m.timeUp||m.phase==="victory") return;
+    var iv=setInterval(function(){
+      setM(function(p){
+        if(p.settings.goal!=="time"||p.paused||p.timeUp||p.phase==="victory") return p;
+        var e=(p.elapsed||0)+1;
+        return Object.assign({},p,{elapsed:e,timeUp:e>=(p.settings.minutes||15)*60});
+      });
+    },1000);
+    return function(){ clearInterval(iv); };
+  },[s.goal,m.paused,m.timeUp,m.phase==="victory"]);
 
   useEffect(function(){
     function onKey(ev){
@@ -253,6 +285,7 @@ function Game(props){
         else if(m.phase==="feedback"){ ev.preventDefault(); cont(); }
         else if(m.phase==="unlock"){ ev.preventDefault(); collect(); }
         else if(m.phase==="crownIntro"){ ev.preventDefault(); toPick(); }
+        else if(m.phase==="tiebreak"){ ev.preventDefault(); tieStart(); }
       }
     }
     window.addEventListener("keydown",onKey);
@@ -298,8 +331,22 @@ function Game(props){
     var log=p.log.slice(0,59);
     log.unshift({team:tm.name,cat:q.cat,ok:ok,timeout:pick===null,crown:!!q.crown,q:q.q});
     return Object.assign({},p,{phase:"feedback",teams:teams,pick:pick,ok:ok,gained:gained,
-      streakBonus:bonus,gotLL:got,again:ok&&(p.chain||1)<(p.settings.chain||1),
+      streakBonus:bonus,gotLL:got,
+      /* once the clock is out nobody chains: this turn is the last one */
+      again:ok&&!p.timeUp&&(p.chain||1)<(p.settings.chain||1),
       pendingUnlock:unlock,crownMissed:crownMissed,log:log,consult:null,second:false});
+  }
+  /* A sudden-death answer buys nothing but survival: no points, no streak, no champion. */
+  function resolveTie(p,pick){
+    var q=p.q, ok=(pick!==null&&pick===q.a);
+    var teams=clone(p.teams), tm=teams[p.turn];
+    if(ok) tm.correct++; else tm.wrong++;
+    var tie=Object.assign({},p.tie,{ok:p.tie.ok.concat(ok?[p.turn]:[])});
+    var log=p.log.slice(0,59);
+    log.unshift({team:tm.name,cat:q.cat,ok:ok,timeout:pick===null,crown:false,tie:true,q:q.q});
+    return Object.assign({},p,{phase:"feedback",teams:teams,pick:pick,ok:ok,gained:0,
+      streakBonus:0,gotLL:null,again:false,pendingUnlock:null,crownMissed:false,
+      tie:tie,log:log,consult:null,second:false});
   }
   function answer(pick){
     if(m.phase!=="question") return;
@@ -310,12 +357,13 @@ function Game(props){
       setM(function(p){ return Object.assign({},p,{second:false,strike:pick}); });
       return;
     }
-    var next=resolveAnswer(m,pick);
+    var next=(m.q&&m.q.tie)?resolveTie(m,pick):resolveAnswer(m,pick);
     sfx(next.ok?"good":"bad");
     setM(next);
   }
   function cont(){
     sfx("click");
+    if(m.q&&m.q.tie){ tieAdvance(); return; }
     if(m.pendingUnlock){ sfx("unlock"); confetti(3000); setM(Object.assign({},m,{phase:"unlock"})); return; }
     setM(Object.assign({},m,{crownMissed:false}));
     later(m.again?sameTeam:nextTurn,10);
@@ -324,7 +372,6 @@ function Game(props){
     sfx("click");
     var next=Object.assign({},m,{pendingUnlock:null,crownMissed:false});
     if(m.teams[m.turn].unlocked.length>=CATS.length){
-      sfx("win"); confetti(11000);
       setM(Object.assign(next,{phase:"victory",winner:m.turn,endedAt:Date.now()}));
       return;
     }
@@ -374,8 +421,50 @@ function Game(props){
   function toPick(){ sfx("click"); setM(function(p){ return Object.assign({},p,{phase:"crownPick"}); }); }
   /* A turn ends the same way whether the team keeps the wheel after a correct answer or
      hands it on; only the seat and the spin counter differ. */
+  /* Ends the match on the standings: one team clear at the top wins on points, two or more
+     level go to sudden death. Used by the round limit, the clock and the host's own button. */
+  function finishByPoints(p,done){
+    var base=Object.assign({},p,{turnsDone:(done===undefined?p.turnsDone:done),paused:false,
+      q:null,cat:null,pick:null,ok:null,gained:0,streakBonus:0,gotLL:null,again:false,
+      pendingUnlock:null,crownMissed:false,consult:null,hidden:null,second:false,strike:null});
+    var tied=tiedTop(p.teams);
+    if(tied.length>1) return Object.assign(base,{phase:"tiebreak",tie:{queue:tied,at:0,ok:[],round:1,note:null}});
+    return Object.assign(base,{phase:"victory",winner:tied[0],byPoints:true,endedAt:Date.now()});
+  }
+  /* hands the next question of a tie-break to the team whose turn it is inside it */
+  function tieQuestion(p,tie){
+    var cat=CATS[Math.floor(Math.random()*CATS.length)].id;
+    var d=drawQuestion(p,cat,false);
+    if(!d) return Object.assign({},p,{phase:"victory",winner:tie.queue[0],byPoints:true,
+      tieWon:true,tie:null,endedAt:Date.now()});
+    d.q.tie=true;
+    return Object.assign({},p,{phase:"question",turn:tie.queue[tie.at],tie:tie,
+      q:d.q,used:d.used,recycled:d.recycled,
+      timeLeft:p.settings.timer,timeMax:p.settings.timer,
+      pick:null,ok:null,hidden:null,second:false,strike:null,consult:null});
+  }
+  function tieStart(){ sfx("click"); setM(function(p){ return tieQuestion(p,p.tie); }); }
+  function tieAdvance(){
+    setM(function(p){
+      var tie=Object.assign({},p.tie,{at:p.tie.at+1});
+      if(tie.at<tie.queue.length) return tieQuestion(p,tie);
+      if(tie.ok.length===1)
+        return Object.assign({},p,{phase:"victory",winner:tie.ok[0],byPoints:true,tieWon:true,
+          tie:null,q:null,endedAt:Date.now()});
+      /* more than one survivor narrows the field; none at all sends the same teams round again */
+      return Object.assign({},p,{phase:"tiebreak",tie:{
+        queue:(tie.ok.length>1?tie.ok:tie.queue),at:0,ok:[],round:tie.round+1,
+        note:(tie.ok.length>1?"again":"none")}});
+    });
+  }
+  function endNow(){ setDrawer(false); setM(function(p){ return finishByPoints(p); }); }
   function freshTurn(p,same){
-    return Object.assign({},p,{phase:"spin",
+    var done=(p.turnsDone||0)+(same?0:1);
+    var st=p.settings;
+    /* the moment the wheel would change hands is the moment a limited match is over */
+    if(!same&&((st.goal==="rounds"&&done>=(st.rounds||5)*p.teams.length)
+             ||(st.goal==="time"&&p.timeUp))) return finishByPoints(p,done);
+    return Object.assign({},p,{phase:"spin",turnsDone:done,
       turn:same?p.turn:(p.turn+1)%p.teams.length,
       chain:same?(p.chain||1)+1:1,
       q:null,cat:null,pick:null,ok:null,gained:0,streakBonus:0,gotLL:null,again:false,
@@ -447,22 +536,30 @@ function Game(props){
       var ts=p.teams.map(function(tm){ var n=clone(tm);
         n.score=0; n.correct=0; n.wrong=0; n.unlocked=[]; n.progress={}; n.crownWins=0;
         n.streak=0; n.best=0; n.lifelines=freshLifelines(); return n; });
-      return Object.assign({},p,{teams:ts,turn:0,chain:1,used:{},log:[],phase:"spin",q:null,cat:null,
-        pick:null,ok:null,gained:0,streakBonus:0,gotLL:null,again:false,
+      return Object.assign({},p,{teams:ts,turn:0,chain:1,turnsDone:0,elapsed:0,timeUp:false,
+        used:{},log:[],phase:"spin",q:null,cat:null,
+        pick:null,ok:null,gained:0,streakBonus:0,gotLL:null,again:false,tie:null,
         pendingUnlock:null,crownMissed:false,hidden:null,second:false,strike:null,
-        fromWheel:false,winner:null,paused:false,timeLeft:p.settings.timer,timeMax:p.settings.timer});
+        fromWheel:false,winner:null,byPoints:false,tieWon:false,paused:false,
+        timeLeft:p.settings.timer,timeMax:p.settings.timer});
     });
   }
 
   if(m.phase==="victory"){
     var w=m.teams[m.winner];
-    var ranked=m.teams.slice().sort(function(a,b){ return (b.unlocked.length-a.unlocked.length)||(b.score-a.score); });
+    var ranked=rankTeams(m.teams).map(function(o){ return o.t; });
     return html`<div class="wrap victory">
       <div style=${{fontSize:"58px",lineHeight:1}}>🏆</div>
       <div class="eyebrow">${T.winner}</div>
       <h2 class="winner-name">${w.name}</h2>
-      <span class="chip gold tnum" style=${{fontSize:"16px"}}>${T.finalScore}: ${w.score} ${T.pts}</span>
-      <div class="winner-cast">${CATS.map(function(c){ return html`<${Tile} key=${c.id} cat=${c.id} on=${true}/>`; })}</div>
+      <div class="row" style=${{justifyContent:"center"}}>
+        <span class="chip gold tnum" style=${{fontSize:"16px"}}>${T.finalScore}: ${w.score} ${T.pts}</span>
+        <span class="chip">${m.byPoints?T.byPoints:T.byChampions}</span>
+        ${m.tieWon?html`<span class="chip gold">♛ ${T.tieWon}</span>`:null}
+      </div>
+      <div class="winner-cast">${CATS.map(function(c){
+        var got=w.unlocked.indexOf(c.id)>=0;
+        return html`<${Tile} key=${c.id} cat=${c.id} on=${got} dim=${!got}/>`; })}</div>
       <${Tile} cat="crown" style=${{width:"120px"}}/>
       <div class="card results">
         <div class="eyebrow" style=${{marginBottom:"12px"}}>${T.summary}</div>
@@ -495,15 +592,17 @@ function Game(props){
     var tmax=m.timeMax||s.timer;
     var pct=clamp(m.timeLeft/tmax*100,0,100);
     var prog=(team.progress&&team.progress[q.cat])||0;
-    middle=html`<div class=${"qcard"+(q.crown?" crown":"")} style=${catVars(q.cat)}>
+    middle=html`<div class=${"qcard"+(q.crown||q.tie?" crown":"")} style=${catVars(q.cat)}>
       <div class="qhead">
         <${Tile} cat=${q.cat}/>
         <span class="cat">${cname(c)}</span>
         <span class="tag cat">${subj(c)}</span>
         ${q.crown?html`<span class="chip gold">♛ ${T.crownQuestion}</span>`:null}
-        <span class="tag">${T[q.dif]} · ${POINTS[q.dif]}</span>
-        ${!q.crown&&team.unlocked.indexOf(q.cat)<0
+        ${q.tie?html`<span class="chip gold">♛ ${T.tiebreak}</span>`:null}
+        ${q.tie?null:html`<span class="tag">${T[q.dif]} · ${POINTS[q.dif]}</span>`}
+        ${!q.crown&&!q.tie&&team.unlocked.indexOf(q.cat)<0
           ?html`<span class="tag">${T.progress} ${Math.min(prog,s.needed)}/${s.needed}</span>`:null}
+        ${q.tie&&m.tie?html`<span class="tag">${T.tieStill}: ${m.tie.queue.length}</span>`:null}
         ${!q.verified?html`<span class="tag warn">${T.unverified}</span>`:null}
       </div>
       <div class="timer-track"><div class=${"timer-fill"+(m.timeLeft<=5?" warn":"")} style=${{width:pct+"%"}}></div></div>
@@ -545,7 +644,8 @@ function Game(props){
           ${m.ok&&!m.pendingUnlock&&!q.crown&&team.unlocked.indexOf(q.cat)>=0
             ?html`<div style=${{marginTop:"7px",fontSize:"13.5px"}}>${T.already}</div>`:null}
         </div>
-        <button class="btn block" onClick=${cont}>${m.pendingUnlock?T.collect:(m.again?T.keepTurn:T.next)}</button>`:null}
+        <button class="btn block" onClick=${cont}>${
+          (m.q&&m.q.tie)?T.continueB:(m.pendingUnlock?T.collect:(m.again?T.keepTurn:T.next))}</button>`:null}
     </div>`;
   } else if(m.phase==="crownPick"){
     var mine=m.teams[m.turn];
@@ -593,7 +693,12 @@ function Game(props){
     <div class="turn-bar" style=${{"--tc":team.color}}>
       <span class="eyebrow">${T.turn}</span>
       <span class="who">${team.name}</span>
-      ${s.chain>1?html`<span class="chip tnum">${T.spinOf} ${m.chain||1}/${s.chain}</span>`:null}
+      ${m.tie?html`<span class="chip gold">♛ ${T.tiebreak} · ${T.tieRound} ${m.tie.round}</span>`
+             :(s.chain>1?html`<span class="chip tnum">${T.spinOf} ${m.chain||1}/${s.chain}</span>`:null)}
+      ${s.goal==="rounds"?html`<span class="chip tnum">${T.roundT} ${Math.min(s.rounds||5,Math.floor((m.turnsDone||0)/m.teams.length)+1)}/${s.rounds||5}</span>`:null}
+      ${s.goal==="time"?html`<span class=${"chip tnum"+((s.minutes||15)*60-(m.elapsed||0)<=60?" warn":"")}>
+        ⏱ ${mmss((s.minutes||15)*60-(m.elapsed||0))}</span>`:null}
+      ${m.timeUp?html`<span class="chip warn">${T.lastTurn}</span>`:null}
       <span class="spacer"></span>
       ${team.streak>=2?html`<span class="chip flame tnum">🔥 ${team.streak}</span>`:null}
       <span class="chip tnum">${team.score} ${T.pts}</span>
@@ -641,6 +746,22 @@ function Game(props){
         <button class="btn lg block" onClick=${collect}>${T.collect}</button>
       </div></div>`:null}
 
+    ${m.phase==="tiebreak"?html`<div class="overlay">
+      <div class="rays"></div>
+      <div class="sheet">
+        <${Sparks}/>
+        <div class="eyebrow">${T.tieRound} ${m.tie.round}</div>
+        <h2 class="crown-title">${T.tiebreak}</h2>
+        <div class="row" style=${{justifyContent:"center"}}>
+          ${m.tie.queue.map(function(i){
+            return html`<span key=${i} class="chip" style=${{borderColor:m.teams[i].color}}>${m.teams[i].name}</span>`;
+          })}
+        </div>
+        <p class="muted" style=${{fontWeight:600,fontSize:"14.5px"}}>
+          ${m.tie.note==="again"?T.tieAgain:(m.tie.note==="none"?T.tieNone:T.tieIntro)}</p>
+        <button class="btn lg block" onClick=${tieStart}>${T.continueB}</button>
+      </div></div>`:null}
+
     ${m.phase==="crownIntro"?html`<div class="overlay">
       <div class="rays"></div>
       <div class="sheet">
@@ -654,7 +775,9 @@ function Game(props){
       </div></div>`:null}
 
     ${drawer?html`<${Drawer} match=${m} setMatch=${setM} audio=${props.audio} setAudio=${props.setAudio}
-      onClose=${function(){setDrawer(false);}} onSkip=${skip} onRestart=${restart} onExit=${props.onExit}/>`:null}
+      projector=${props.projector} setProjector=${props.setProjector}
+      onClose=${function(){setDrawer(false);}} onSkip=${skip} onRestart=${restart}
+      onEndNow=${endNow} onExit=${props.onExit}/>`:null}
     ${toast?html`<${Toast} msg=${toast} onDone=${function(){setToast(null);}}/>`:null}
   </div>`;
 }

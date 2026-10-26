@@ -86,6 +86,7 @@ button{font-family:inherit}
 .chip{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:6px 13px;
   font-size:13.5px;font-weight:800;background:var(--panel-2);border:1px solid var(--line)}
 .chip.gold{background:var(--gold);color:var(--gold-ink);border-color:transparent}
+.chip.warn{background:rgba(255,98,79,.2);border-color:var(--bad);color:#ffd7d1}
 .tag{display:inline-flex;align-items:center;font-size:11px;font-weight:800;letter-spacing:.07em;
   text-transform:uppercase;padding:4px 9px;border-radius:7px;background:var(--panel-2);
   border:1px solid var(--line);color:var(--ink-2)}
@@ -442,6 +443,26 @@ td.num{text-align:right;font-variant-numeric:tabular-nums;font-weight:900}
   .qtext{font-size:clamp(24px,2.2vw,36px)}
   .opt{font-size:19px;padding:16px 18px}
 }
+
+/* ---------- projector mode ----------
+   The same board read from the back of a hall: everything the room needs to follow grows, and
+   the host's own small print — hints, keyboard legends, question ids — gets out of the way. */
+html.proj body{font-size:19px}
+html.proj .qtext{font-size:clamp(27px,3.4vw,46px)}
+html.proj .opt{font-size:clamp(19px,2vw,26px);padding:18px 20px}
+html.proj .opt .key{width:40px;height:40px;font-size:19px}
+html.proj .explain{font-size:19px}
+html.proj .verdict .big{font-size:clamp(23px,2.6vw,34px)}
+html.proj .turn-bar .who{font-size:clamp(21px,2.6vw,32px)}
+html.proj .team-card .tname{font-size:19px}
+html.proj .team-card .score{font-size:25px}
+html.proj .rchip{font-size:15.5px;padding:8px 15px}
+html.proj .rchip .pos{width:23px;height:23px;font-size:13px}
+html.proj .chip,html.proj .tag{font-size:14px}
+html.proj .qhead .cat{font-size:21px}
+html.proj .ll{font-size:15px;padding:10px 14px}
+html.proj .eyebrow{font-size:13px}
+html.proj .hint,html.proj .kbd,html.proj .lifelines .hint{display:none}
 @media (prefers-reduced-motion:reduce){
   *{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
   .wheel-rotor.spin{transition:transform .4s ease-out}

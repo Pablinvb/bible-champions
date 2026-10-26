@@ -10,6 +10,23 @@ function shuffle(a){ var r=a.slice(); for(var i=r.length-1;i>0;i--){var j=Math.f
 function clone(o){ return JSON.parse(JSON.stringify(o)); }
 function clamp(n,a,b){ return Math.max(a,Math.min(b,n)); }
 function catOf(id){ return CAT_BY_ID[id]||CATS[0]; }
+function mmss(s){ s=Math.max(0,Math.round(s)); return Math.floor(s/60)+":"+("0"+(s%60)).slice(-2); }
+/* The order the game is settled in, everywhere it is settled: champions first, score as the
+   tie-break, seat order only so the list never shuffles on its own. */
+function rankTeams(teams){
+  return teams.map(function(t,i){ return {t:t,i:i}; }).sort(function(a,b){
+    return (b.t.unlocked.length-a.t.unlocked.length)||(b.t.score-a.t.score)||(a.i-b.i);
+  });
+}
+/* everyone level at the top — one name means a winner, more means sudden death */
+function tiedTop(teams){
+  var r=rankTeams(teams), top=r[0], out=[top.i];
+  for(var k=1;k<r.length;k++){
+    if(r[k].t.unlocked.length!==top.t.unlocked.length||r[k].t.score!==top.t.score) break;
+    out.push(r[k].i);
+  }
+  return out;
+}
 function catVars(id){ return {"--cc":"var(--c-"+id+")"}; }
 /* the side of a bilingual row for the active language, falling back to the other one */
 function side(q,lang){
@@ -553,9 +570,7 @@ function TeamCard(props){
 /* Four teams sit in the four corners, so the race itself is hard to read off the seats.
    This strip puts them in order: champions first, points as the tie-break. */
 function Standings(props){
-  var order=props.teams.map(function(t,i){ return {t:t,i:i}; }).sort(function(a,b){
-    return (b.t.unlocked.length-a.t.unlocked.length)||(b.t.score-a.t.score)||(a.i-b.i);
-  });
+  var order=rankTeams(props.teams);
   return html`<div class="standings" aria-label=${T.rank}>
     ${order.map(function(o,k){
       return html`<span key=${o.t.id} class=${"rchip"+(o.i===props.turn?" live":"")} style=${{"--tc":o.t.color}}>

@@ -67,7 +67,26 @@ commit, and push: GitHub Pages serves the repository root.
   unlock bonus. Wrong, nothing is won and the turn passes. **Crown never gives a champion away.**
 - A subject whose champion a team already holds still scores points; champions are never
   duplicated.
-- The first team holding all seven champions wins, and the match stops there.
+
+### How it ends
+
+Three settings, chosen at setup and changeable mid-match from the host panel:
+
+- **With all seven** (the default) — the first team to collect every champion wins, and the
+  match stops there.
+- **After rounds** — 3, 5 or 8 rounds. A round is one turn each, however many spins a turn ran to.
+- **On the clock** — 10, 15, 20 or 30 minutes. The clock stops while the match is paused, and
+  when it reaches zero the turn in progress is still played out: the team in the chair is never
+  cut off mid-question. It just cannot chain another spin.
+
+Rounds and the clock finish **on points**: most champions first, score as the tie-break. The
+host can also end any match early with **End and declare a winner**, which settles it the same
+way. Collecting all seven still wins outright in every mode.
+
+If two or more teams are dead level at the top — same champions, same score — the match goes to
+**sudden death** instead of being called a draw. Each tied team answers one question of its own:
+whoever gets it right stays in. More than one survivor and the survivors go again; none at all
+and the same teams go again. No points, no champions and no streak are at stake, only staying in.
 
 ### Lifelines
 
@@ -84,6 +103,13 @@ Five of them. Every team starts with one of each and never holds more than three
 With **Earn lifelines** on (the default), a team is given one more — picked at random from the
 ones it is not full on — for every three correct answers in a row and for every crown challenge
 won. Turn it off at setup for a strictly one-of-each match.
+
+### Projector mode
+
+**Settings → Projector mode**, or the same switch in the host panel. Question text, answers,
+team names, scores and the standings all grow for a screen the whole room reads from the back,
+and the host's own small print — hints and keyboard legends — gets out of the way. It is
+remembered on the device, so a hall laptop stays set up.
 
 ### On the board
 
